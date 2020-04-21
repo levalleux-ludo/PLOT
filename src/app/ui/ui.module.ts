@@ -5,6 +5,13 @@ import { HeaderComponent } from './layout/header/header.component';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { MainComponent } from './layout/main/main.component';
 import { ClarityModule } from '@clr/angular';
+import { SubnavComponent } from './layout/subnav/subnav.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ProjectsComponent } from './projects/projects.component';
+import { ReportsComponent } from './reports/reports.component';
+import { UsersComponent } from './users/users.component';
+import { SettingsComponent } from './settings/settings.component';
+import { UiRoutingModule } from './ui-routing.module';
 
 
 
@@ -13,14 +20,26 @@ import { ClarityModule } from '@clr/angular';
     LayoutComponent,
     HeaderComponent,
     SidebarComponent,
-    MainComponent
+    MainComponent,
+    SubnavComponent,
+    DashboardComponent,
+    ProjectsComponent,
+    ReportsComponent,
+    UsersComponent,
+    SettingsComponent
   ],
   imports: [
     CommonModule,
-    ClarityModule
+    ClarityModule,
+    UiRoutingModule
   ],
   exports: [
-    LayoutComponent
+    LayoutComponent,
+    DashboardComponent,
+    ProjectsComponent,
+    ReportsComponent,
+    UsersComponent,
+    SettingsComponent
   ]
 })
 export class UiModule { }
