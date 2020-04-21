@@ -3,9 +3,12 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-layout',
   template: `
-    <p>
-      layout works!
-    </p>
+    <div class="main-container">
+    <app-header></app-header>
+    <app-main>
+      <ng-content></ng-content>
+    </app-main>
+  </div>
   `,
   styles: []
 })
