@@ -2,14 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-layout',
-  template: `
-    <clr-main-container>
-    <app-header></app-header>
-    <app-main>
-      <ng-content></ng-content>
-    </app-main>
-  </clr-main-container>
-  `,
+  templateUrl: './layout.component.html',
   styles: []
 })
 export class LayoutComponent implements OnInit {

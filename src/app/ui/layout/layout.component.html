@@ -1,0 +1,10 @@
+<clr-main-container>
+    <app-header [title]="'test-clarity'"></app-header>
+    <app-subnav></app-subnav>
+    <div class="content-container">
+        <div class="content-area">
+            <ng-content></ng-content>
+        </div>
+        <app-sidebar class="sidenav" [clr-nav-level]="2"></app-sidebar>
+    </div>
+</clr-main-container>
