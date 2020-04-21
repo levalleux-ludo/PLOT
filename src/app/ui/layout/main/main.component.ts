@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
     <div class="content-area">
       <ng-content></ng-content>
     </div>
-    <app-sidebar class="sidenav"></app-sidebar>
+    <app-sidebar class="sidenav" ></app-sidebar>
   </div>
   `,
   styles: []

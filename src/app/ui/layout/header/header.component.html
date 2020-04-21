@@ -1,11 +1,11 @@
-<header class="header-1">
+<clr-header class="header-1">
     <div class="branding">
         <a class="nav-link">
             <clr-icon shape="shield"></clr-icon>
             <span class="title">Angular CLI</span>
         </a>
     </div>
-    <div class="header-nav">
+    <div class="header-nav" [clr-nav-level]="1">
         <a class="active nav-link nav-icon">
             <clr-icon shape="home"></clr-icon>
         </a>
@@ -31,8 +31,8 @@
             </div>
         </clr-dropdown>
     </div>
-</header>
-<nav class="subnav">
+</clr-header>
+<nav class="subnav" [clr-nav-level]="2">
     <ul class="nav">
         <li class="nav-item">
             <a class="nav-link active" href="#">Dashboard</a>
