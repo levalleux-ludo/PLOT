@@ -1,0 +1,15 @@
+<div class="dox-wrapper dox-header" [class.new-component-layout]="useNewLayout">
+    <section>
+        <h1 clrFocusOnViewInit>{{title}}</h1>
+    </section>
+</div>
+<section class="dox-content" [ngClass]="{'closed-panel': !sidePanelOpened, 'opened-panel': sidePanelOpened}">
+    <ng-content></ng-content>
+</section>
+<div class="side-panel" #sidePanel [ngClass]="{'closed-panel': !sidePanelOpened, 'opened-panel': sidePanelOpened}">
+    <button *ngIf="sidePanelOpened" class="closing-panel-btn" (click)="sidePanelOpened=!sidePanelOpened;">&gt;&gt;</button>
+    <button *ngIf="!sidePanelOpened" class="closing-panel-btn" (click)="sidePanelOpened=!sidePanelOpened;">&lt;&lt;</button>
+    <span *ngIf="sidePanelOpened">
+      <ng-container *ngTemplateOutlet="sidePanelTemplate;context:sidePanelContext"></ng-container>
+  </span>
+</div>

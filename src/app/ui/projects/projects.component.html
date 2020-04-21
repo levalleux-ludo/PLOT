@@ -1,1 +1,102 @@
-<p>projects works!</p>
+<ng-template #sidePanelTemplate let-fileName="fileName">
+    <div class="side-panel-header">
+        <div ngClass.xs="h3-xs" ngClass.sm="h3-sm" ngClass.md="h3-md" ngClass.lg="h3-lg">{{fileName}} details</div>
+    </div>
+    <div class="side-panel-content">
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>end!</p>
+
+    </div>
+
+</ng-template>
+<app-doc-wrapper [title]="'My Projects'" [newLayout]="true" #docWrapper [sidePanelTemplate]="sidePanelTemplate" [sidePanelContext]="getSidePanelContext()">
+    <article>
+        <clr-tree>
+            <clr-tree-node *ngFor="let directory of rootDirectory" [(clrExpanded)]="directory.expanded">
+                <clr-icon [attr.shape]="directory.icon"></clr-icon>
+                {{directory.name}}
+                <clr-tree-node *ngFor="let file of directory.files">
+                    <button (click)="selectFile(directory, file)" class="clr-treenode-link" [class.active]="isActive(file)">
+                  <clr-icon [attr.shape]="file.icon"></clr-icon>
+                  {{file.name}}
+              </button>
+                </clr-tree-node>
+            </clr-tree-node>
+        </clr-tree>
+    </article>
+</app-doc-wrapper>

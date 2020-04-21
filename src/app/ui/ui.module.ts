@@ -12,6 +12,8 @@ import { ReportsComponent } from './reports/reports.component';
 import { UsersComponent } from './users/users.component';
 import { SettingsComponent } from './settings/settings.component';
 import { UiRoutingModule } from './ui-routing.module';
+import { DocWrapperComponent } from './layout/doc-wrapper/doc-wrapper.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 
@@ -26,12 +28,14 @@ import { UiRoutingModule } from './ui-routing.module';
     ProjectsComponent,
     ReportsComponent,
     UsersComponent,
-    SettingsComponent
+    SettingsComponent,
+    DocWrapperComponent
   ],
   imports: [
     CommonModule,
     ClarityModule,
-    UiRoutingModule
+    UiRoutingModule,
+    FlexLayoutModule
   ],
   exports: [
     LayoutComponent,

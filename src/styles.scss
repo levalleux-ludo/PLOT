@@ -1,1 +1,117 @@
 /* You can add global styles to this file, and also import other style files */
+
+.dox-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+
+.dox-header {
+    padding-top: .9rem;
+    flex: 0 0 5.4rem;
+    padding-left: 1.8rem;
+    position: relative;
+    border-bottom: .05rem solid #ccc;
+}
+
+.dox-content {
+    flex: 1 1 auto;
+    overflow-y: scroll;
+    border-top: .05rem solid transparent;
+    height: 100%;
+}
+
+.dox-content-panel {
+    padding: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+}
+
+.dox-content-wrapper {
+    padding-left: 1.8rem;
+    padding-top: .3rem;
+    padding-bottom: 4.8rem;
+    max-width: 45rem;
+    width: 100%;
+}
+
+.side-panel {
+    position: absolute;
+    right: 0;
+    background-color: #3f4d5f;
+    margin-top: 108px;
+    height: calc(100% - 108px);
+    overflow: auto;
+}
+
+.side-panel.opened-panel {
+    min-width: 310px;
+    width: 50%;
+    padding: 12px;
+}
+
+.side-panel.closed-panel {
+    min-width: 32px;
+    width: 32px;
+    padding: 0px;
+}
+
+.dox-content.opened-panel {
+    min-width: 310px;
+    width: 50%;
+    padding: 12px;
+}
+
+.dox-content.closed-panel {
+    min-width: 310px;
+    width: calc(100% - 32px);
+    padding: 0px;
+}
+
+.closing-panel-btn {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 999;
+    background-color: rgb(27, 42, 50);
+    color: #acbac3;
+    border: none;
+}
+
+.side-panel-header {
+    flex: 0 0 5.4rem;
+    padding-left: 1.8rem;
+    position: relative;
+    border-bottom: .05rem solid #ccc;
+    height: 60px;
+    color: #000;
+}
+
+.side-panel-content {
+    overflow: auto;
+    position: relative;
+    top: 12px;
+    height: calc(100% - 84px);
+    color: #000;
+}
+
+.h3-xs {
+    font-size: 0.8rem;
+    font-weight: 200;
+}
+
+.h3-sm {
+    font-size: 1.0rem;
+    font-weight: 200;
+}
+
+.h3-md {
+    font-size: 1.2rem;
+    font-weight: 200;
+}
+
+.h3-lg {
+    font-size: 1.4rem;
+    font-weight: 200;
+}
