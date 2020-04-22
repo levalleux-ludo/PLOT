@@ -14,6 +14,8 @@ import { SettingsComponent } from './settings/settings.component';
 import { UiRoutingModule } from './ui-routing.module';
 import { DocWrapperComponent } from './layout/doc-wrapper/doc-wrapper.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { PresentationComponent } from './presentation/presentation.component';
+import { ScrollDispatcher, ScrollingModule } from '@angular/cdk/scrolling';
 
 
 
@@ -29,13 +31,15 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     ReportsComponent,
     UsersComponent,
     SettingsComponent,
-    DocWrapperComponent
+    DocWrapperComponent,
+    PresentationComponent
   ],
   imports: [
     CommonModule,
     ClarityModule,
     UiRoutingModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    ScrollingModule
   ],
   exports: [
     LayoutComponent,
@@ -44,6 +48,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     ReportsComponent,
     UsersComponent,
     SettingsComponent
-  ]
+  ],
+  providers: [ScrollDispatcher]
 })
 export class UiModule { }

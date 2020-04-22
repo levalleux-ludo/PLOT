@@ -3,10 +3,13 @@
         <h1 clrFocusOnViewInit>{{title}}</h1>
     </section>
 </div>
-<section class="dox-content" [ngClass]="{'closed-panel': !sidePanelOpened, 'opened-panel': sidePanelOpened}">
+<section #scrollableArea cdkScrollable class="dox-content" [ngClass]="{'closed-panel': !sidePanelOpened, 'opened-panel': sidePanelOpened, 'no-panel': !sidePanelTemplate}">
+    <div *ngIf="tocTemplate" class="toc-panel" #tocPanel>
+        <ng-container *ngTemplateOutlet="tocTemplate;context:tocContext"></ng-container>
+    </div>
     <ng-content></ng-content>
 </section>
-<div class="side-panel" #sidePanel [ngClass]="{'closed-panel': !sidePanelOpened, 'opened-panel': sidePanelOpened}">
+<div *ngIf="sidePanelTemplate" class="side-panel" #sidePanel [ngClass]="{'closed-panel': !sidePanelOpened, 'opened-panel': sidePanelOpened}">
     <button *ngIf="sidePanelOpened" class="closing-panel-btn" (click)="sidePanelOpened=!sidePanelOpened;">&gt;&gt;</button>
     <button *ngIf="!sidePanelOpened" class="closing-panel-btn" (click)="sidePanelOpened=!sidePanelOpened;">&lt;&lt;</button>
     <span *ngIf="sidePanelOpened">

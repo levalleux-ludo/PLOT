@@ -1,4 +1,5 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, TemplateRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, TemplateRef, AfterViewChecked } from '@angular/core';
+// import { ScrollDispatcher } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'app-doc-wrapper',
@@ -8,7 +9,7 @@ import { Component, OnInit, Input, ViewChild, ElementRef, TemplateRef } from '@a
     '[class.dox-wrapper]': 'true',
   }
 })
-export class DocWrapperComponent implements OnInit {
+export class DocWrapperComponent implements OnInit, AfterViewChecked {
 
   @Input() title = '';
   @Input() newLayout = false;
@@ -17,13 +18,29 @@ export class DocWrapperComponent implements OnInit {
   sidePanelTemplate: TemplateRef<any>;
   @Input()
   sidePanelContext: any;
+  @Input()
+  tocTemplate: TemplateRef<any>;
+  @Input()
+  tocContext: any;
 
   @ViewChild('sidePanel')
   sidePanel: ElementRef;
 
-  constructor() { }
+  @ViewChild('scrollableArea')
+  _scrollableArea: ElementRef;
+
+  constructor(
+    // private scrollDispatcher: ScrollDispatcher
+  ) { }
 
   ngOnInit(): void {
+  }
+
+  ngAfterViewChecked(): void {
+    // this.scrollDispatcher.scrolled()
+    // .subscribe(event => {
+    //   console.log('scrolled');
+    // });
   }
 
   get useNewLayout() {
@@ -36,6 +53,10 @@ export class DocWrapperComponent implements OnInit {
 
   showSidePanel() {
     this.sidePanelOpened = true;
+  }
+
+  public get scrollableArea(): ElementRef {
+    return this._scrollableArea;
   }
 
 }

@@ -1,0 +1,133 @@
+<ng-template #tocTemplate>
+    <div id="toc_container">
+        <p class="toc_title">Contents</p>
+        <ul class="toc_list">
+            <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_1')">Preliminary Design.</a>
+                <ul style="list-style-type: circle;">
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_1_1')">Actors</a></li>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_1_2')">Usecases</a></li>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_1_3')">Privacy concerns</a></li>
+                </ul>
+            </li>
+            <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_2')">Researches &amp; technology</a>
+                <ul>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_2_1')">Spatial Bloom Filters</a></li>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_2_2')">Private Set Intersection</a></li>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_2_3')">Non-interactive zero-knowledge proof (ZK-snark)</a></li>
+                </ul>
+            </li>
+            <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_3')">Case study</a>
+                <ul>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_3_1')">Hypothesis for a Data Model and Limits regarding Privacy Preservation</a></li>
+                    <li><a pageScroll class="tocLink" (click)="scrollTo('#toc_3_2')">Simulation</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="sticky-btn tooltip tooltip-top-left" (click)="scrollTo('#toc_container')" *ngIf="backOnTopBtnVisible">
+        <clr-icon shape="circle-arrow" class="is-solid" size='48'></clr-icon>
+        <span class="tooltip-content">Go back to top</span>
+    </div>
+</ng-template>
+
+<app-doc-wrapper [title]="'Presentation'" [newLayout]="true" [tocTemplate]="tocTemplate" #docWrapper>
+    <article #article id="article" class="presentation">
+        <h1>COVID-19 and Geo Tracking &ndash; are Blockchain(s) and ZKP technics able to better preserve individual&rsquo;s privacy?</h1>
+        <p>All around the world, location tracking mobile apps are assessed in order to fight COVID-19 pandemic. As suggested to the WHO (<a href="https://www.who.int/news-room/q-a-detail/contact-tracing">https://www.who.int/news-room/q-a-detail/contact-tracing</a>),
+            this technology can really help the contacts to get care and treatment, and will prevent further transmission of a virus.</p>
+        <p>Such applications are already deployed in some countries, for instance:</p>
+        <ul>
+            <li>China : <a href="https://www.theguardian.com/world/2020/apr/01/chinas-coronavirus-health-code-apps-raise-concerns-over-privacy">https://www.theguardian.com/world/2020/apr/01/chinas-coronavirus-health-code-apps-raise-concerns-over-privacy</a>,</li>
+            <li>Singapour : <a href="https://www.mobihealthnews.com/news/asia-pacific/singapore-government-launches-new-app-contact-tracing-combat-spread-covid-19">https://www.mobihealthnews.com/news/asia-pacific/singapore-government-launches-new-app-contact-tracing-combat-spread-covid-19</a>,</li>
+            <li>Poland : <a href="https://www.gov.pl/web/cyfryzacja/aplikacja-kwarantanna-domowa--ruszyl-proces-jej-udostepniania">https://www.gov.pl/web/cyfryzacja/aplikacja-kwarantanna-domowa--ruszyl-proces-jej-udostepniania</a></li>
+        </ul>
+        <p>However, these governmental policies raise concern about the individual&rsquo;s privacy.</p>
+        <p>In this project, we would like to experiment how <strong>the blockchain technology</strong> (as an opened decentralized ledger) <strong>associated with Zero-Knowledge Proof</strong> (ZKP) technics can meet the challenge to propose an appropriate
+            trade-off between pandemic fight efficiency (through opened shared data) <strong>and preservation of individual&rsquo;s data privacy</strong>.</p>
+        <h2 id="toc_1">Preliminary Design</h2>
+        <h3 id="toc_1_1">Actors:</h3>
+        <p>Let&rsquo;s consider:</p>
+        <ul>
+            <li>Alice: an individual knowing that is infected (she may have neat symptoms and/or have been tested positively)</li>
+            <li>Bob: an individual that don&rsquo;t know if he is infected (he doesn&rsquo;t have any symptom)</li>
+            <li>The Department of Health and Social Care, or equivalent administration on the consider area</li>
+            <li>The System itself</li>
+            <li>A potential ad&rsquo;hoc smartphone application for geo-tracking</li>
+            <li>A third-party service that already track location of individuals (mobile operators or suppliers: Google/Apple).</li>
+        </ul>
+        <h3 id="toc_1_2">Usecases:</h3>
+        <img src="./assets/UseCaseDiagram1.png" width="80%">
+        <h4>1. Get record of its location for the last 15 days</h4>
+        <p>At any time, Alice or Bob can get the record of their geographical location for the last 15 days. They can use a dedicated app on their smartphone, or they can request the location data recorded by their mobile operator, or their location from
+            Google or Apple if they have subscribed to these services.</p>
+        <h4>2. Publish its location record</h4>
+        <p>When Alice is warned she&rsquo;s infected, she gets her location record for the last 15 days, and she publishes it up to the system. The system merges the data from Alice into a global infection location record.</p>
+        <h4>3. Request an infection assessment status, get a risk score and recommendations</h4>
+        <p>At any time, Bob can send its location record to the system and request for knowing if he has been in contact with infected people in the last 15 days. For that, the system compares the Bob&rsquo;s location record of Bob to the global infection
+            location record. As a result, the system tells Bob how many times he&rsquo;s been potentially in contact with how many infected people. The greater are these numbers, the greater is the risk for Bob for having been infected himself. At a given
+            threshold, the system</p>
+        <h4>4. Analyze the spread of infection, across time and places</h4>
+        <p>At any time, the Department of Health and Social Care can analyze the global infection location record to monitor the spread of the infection across time and places.</p>
+        <h4>5. Adjust the "risk score" criteria and recommendations</h4>
+        <p>At any time, the Department of Health and Social Care can adjust the thresholds used for the &lsquo;risk score&rsquo; and recommendations provided to users regarding their exposition to the infection.</p>
+        <h3 id="toc_1_3">Privacy concerns:</h3>
+        <p>The location record of any user has to remain private and can&rsquo;t be divulgated to anyone except the user himself.</p>
+        <p>We conclude that any smartphone app that records the location if the user shall keep the data locally. But, if the location record is provided thanks to a third-party service (mobile operator, Google, Apple), we can only assume that these services
+            are compliant with global regulations (GDPR, CCPA, &hellip;) at least.</p>
+        <p>We conclude also that the system shall ensure the transmission of the personal location record of the users, in usecases 2. and 3, is being encrypted.</p>
+        <p>When the system merges the record from all infected people, this lead to anonymize the data. But the privacy is violated anyway, because a simple comparison between before and after merging Alice&rsquo;s record allows an attacker to deduce the
+            Alice&rsquo;s record data (and this is so obvious for the first user publishing its record!)</p>
+        <p>We conclude that the system shall even encrypt the global infection location record, while it still has to be published to allow analysis (usecase 4).</p>
+        <p><strong><em>As we see, the requirements in terms of privacy are the main concerns for designing that system.</em></strong></p>
+        <h2 id="toc_2">Researches &amp; technology</h2>
+        <p>An obvious challenge of this system is the ability to use the information about the infection location, without revealing it. This is a typical case for Zero-knowledge proof technics (ZKP).</p>
+        <p>Our researches about ZKP have resulted in the following paths:</p>
+        <h3 id="toc_2_1">Spatial Bloom Filters</h3>
+        <p><a href="http://sbf.csr.unibo.it/index.html">http://sbf.csr.unibo.it/index.html</a></p>
+        <p><a href="https://llimllib.github.io/bloomfilter-tutorial/">https://llimllib.github.io/bloomfilter-tutorial/</a></p>
+        <p>&nbsp;</p>
+        <h3 id="toc_2_2">Private Set Intersection</h3>
+        <p><em>From Wikipedia, the free encyclopedia</em></p>
+        <p><strong>Private set intersection</strong>&nbsp;is a&nbsp;<a href="https://en.wikipedia.org/wiki/Secure_multiparty_computation">secure multiparty computation</a>&nbsp;cryptographic technique<sup><a href="https://en.wikipedia.org/wiki/Private_set_intersection#cite_note-1">[1]</a></sup>&nbsp;that
+            allows two parties holding sets to compare encrypted versions of these sets in order to compute the intersection. In this scenario, neither party reveals anything to the counterparty except for the elements in the intersection.</p>
+        <p>Other variants of this exist, such as the server-client scenario, in which only the client learns the intersection of her set with the set of the server, without the server learning intersection of his set with the clients.<sup><a href="https://en.wikipedia.org/wiki/Private_set_intersection#cite_note-2">[2]</a></sup></p>
+        <h4 id="toc_"><strong>References</strong><strong>[</strong><strong><a href="https://en.wikipedia.org/w/index.php?title=Private_set_intersection&amp;action=edit&amp;section=1">edit</a></strong><strong>]</strong></h4>
+        <ol>
+            <li><strong><a href="https://en.wikipedia.org/wiki/Private_set_intersection#cite_ref-1" aria-label="Jump up">^</a></strong>Chen, Hao; Laine, Kim; Rindal, Peter (2018-05-16).&nbsp;<a href="https://www.microsoft.com/en-us/research/publication/fast-private-set-intersection-homomorphic-encryption/">Fast Private Set Intersection from Homomorphic Encryption</a>.&nbsp;
+                <a href="https://en.wikipedia.org/wiki/ISBN_(identifier)">ISBN</a>&nbsp;<a href="https://en.wikipedia.org/wiki/Special:BookSources/9781450349468">9781450349468</a>.</li>
+            <li><strong><a href="https://en.wikipedia.org/wiki/Private_set_intersection#cite_ref-2" aria-label="Jump up">^</a></strong>Pinkas, Benny.&nbsp;<a href="https://cyber.biu.ac.il/wp-content/uploads/2017/01/15.pdf">Private Set Intersection</a>&nbsp;<em>(PDF)</em>.</li>
+        </ol>
+        <p>&nbsp;</p>
+        <h3 id="toc_2_3">Non-interactive zero-knowledge proof (ZK-snark)</h3>
+        <p><em>From Wikipedia, the free encyclopedia</em></p>
+        <p><strong>Non-interactive zero-knowledge proofs</strong>&nbsp;are a variant of&nbsp;<a href="https://en.wikipedia.org/wiki/Zero-knowledge_proof">zero-knowledge proofs</a>&nbsp;in which no interaction is necessary between prover and verifier.</p>
+        <p>Tools and technology</p>
+        <ul>
+            <li>Circom and snarkJS</li>
+            <li>Bloom Filter implementation</li>
+        </ul>
+        <h2 id="toc_3">Case study</h2>
+        <p>Let&rsquo;s start considering an example, as a case study, to see how we can design and architect our system.</p>
+        <h3 id="toc_3_1">Hypothesis for a Data Model and Limits regarding Privacy Preservation:</h3>
+        <p>To start defining the data model we could use in our system, we consider the following hypothesis:</p>
+        <ul>
+            <li>a location record is composed of 15 day records (1 per day); This is because, in the considered case of COVID-19 infection, the transmission period last 15 days, hence it&rsquo;s not useful to check for individuals contacts more than 15 days
+                in the past.</li>
+            <li>the location of an individual is measured in X,Y coordinated, in a 10kmx10km area, with a precision of 5m, giving a total of 2000x2000=4M different unit locations.</li>
+            <li>the day record contains the individual&rsquo;s location each 6 minutes, giving a total of 240 time slots during the day. Here we consider that the privacy of</li>
+        </ul>
+        <p>These arbitrary values imply that:</p>
+        <ul>
+            <li>the system will consider that 2 people will have been &lsquo;in contact&rsquo; if they are not far from 10 meters from each other during a period of 6 minutes at minimum.</li>
+            <li>the privacy of the individual location is limited in space to 10kmx10km and in time to 1 day, that means that it will be publicly revealed whether an individual have been located in that 10kmx10km area on a given day. But it won&rsquo;t be
+                told exactly where in this location and what time during this day.</li>
+        </ul>
+        <h3 id="toc_3_2">Simulation</h3>
+        <p>To begin, let&rsquo;s start with a simplified (downscaled) model, just keeping in mind the real scale to ensure the chosen design will fit it.</p>
+        <p>In our simulation, we consider:</p>
+        <ul>
+            <li>12 time slots per day (1 each hour), instead of 240</li>
+            <li>An 80mx80m area, giving a total of 16x16 unit locations</li>
+        </ul>
+    </article>
+</app-doc-wrapper>

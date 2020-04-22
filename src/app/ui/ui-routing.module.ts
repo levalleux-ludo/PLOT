@@ -4,17 +4,19 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ProjectsComponent } from './projects/projects.component';
 import { ReportsComponent } from './reports/reports.component';
 import { UsersComponent } from './users/users.component';
+import { PresentationComponent } from './presentation/presentation.component';
 
 
 const routes: Routes = [
   {path: 'dashboard', component: DashboardComponent},
   {path: 'projects', component: ProjectsComponent},
   {path: 'reports', component: ReportsComponent},
-  {path: 'users', component: UsersComponent}
+  {path: 'users', component: UsersComponent},
+  {path: 'presentation', component: PresentationComponent}
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forRoot(routes, { useHash: false, anchorScrolling: 'enabled'})],
   exports: [RouterModule]
 })
 export class UiRoutingModule { }
