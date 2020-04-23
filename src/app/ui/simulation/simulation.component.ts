@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { randomInt } from 'src/app/_helpers/utils';
+import { returnOrFallthrough } from '@clr/core/common';
 
 class Location {
   constructor(public x: number, public y: number) {}
@@ -14,7 +15,7 @@ class Location {
   }
 }
 
-interface Individual {name: string; locations: Location[]; }
+interface Individual {name: string; locations: Location[]; infectedTime: number;}
 
 interface TimeSlot {time: number; locations: Location[]; }
 
@@ -37,9 +38,12 @@ export class SimulationComponent implements OnInit {
 
   individuals: Individual[] = this.createIndividuals();
 
+  globalInfectionReport : {locations: Location[]}[] = [];
+
   constructor() { }
 
   ngOnInit(): void {
+    this.refreshGlobalinfectionReport();
   }
 
   createTimeSlots(): TimeSlot[] {
@@ -65,7 +69,8 @@ export class SimulationComponent implements OnInit {
     for (let person of this.people) {
       const individual = {
         name: person,
-        locations: []
+        locations: [],
+        infectedTime: -1
       };
       let location = new Location(
         randomInt(0, this.areaSideSize),
@@ -146,6 +151,48 @@ export class SimulationComponent implements OnInit {
       }
     // }
     return contacts;
+  }
+
+  getClassesForTable() {
+    if (this.areaSideSize <= 4) {
+      return "clr-col-6 clr-col-md-3 clr-col-lg-2 clr-col-xl-1";
+    } else if (this.areaSideSize <= 6) {
+      return "clr-col-xs-12 clr-col-sm-6 clr-col-md-4 clr-col-lg-3 clr-col-xl-2";
+    }
+    return "clr-col-12 clr-col-md-6 clr-col-lg-4 clr-col-xl-3";
+  }
+
+  onChecked(checked, individual, timeSlot) {
+    if (checked) {
+      individual.infectedTime = timeSlot.time;
+    } else {
+      individual.infectedTime = -1;
+    }
+    this.refreshGlobalinfectionReport();
+  }
+
+  refreshGlobalinfectionReport() {
+    this.globalInfectionReport = [];
+    for (let timeSlot of this.timeSlots) {
+      const locations = [];
+      for (let individual of this.individuals) {
+        if ((individual.infectedTime >= 0) && (individual.infectedTime <= timeSlot.time)) {
+          locations.push(individual.locations[timeSlot.time]); // TODO: avoid duplicates
+        }
+      }
+      this.globalInfectionReport.push({locations});
+    }
+  }
+
+  getGlobalInfectionAtTime(time: number): string {
+    let report = '';
+    for (const location of this.globalInfectionReport[time].locations) {
+      if (report !== '') {
+        report += '\n';
+      }
+      report += location.toString();
+    }
+    return report;
   }
 
 }
