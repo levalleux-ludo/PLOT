@@ -20,16 +20,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'test-clarity'`, () => {
+  it(`should have as title 'plot'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('test-clarity');
+    expect(app.title).toEqual('plot');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('test-clarity app is running!');
+    expect(compiled.querySelector('.content span').textContent).toContain('plot app is running!');
   });
 });
