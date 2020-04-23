@@ -1,0 +1,25 @@
+.simulations {
+    padding: 24px;
+    font-size: 1em;
+}
+
+.tab-content {}
+
+.tab-cell {
+    border: solid;
+    // width: 24px !important;
+    border-width: 1px;
+    padding-right: 1px;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+}
+
+td {
+    border-top-width: 1px !important;
+    border-top-style: solid !important;
+}
+
+// td:first-child {
+//     padding-left: 0.6rem !important;
+// }

@@ -1,0 +1,62 @@
+<app-doc-wrapper [title]="'Simulations'" [newLayout]="true" #docWrapper>
+    <article #article id="article" class="simulations">
+        <clr-tabs>
+            <clr-tab>
+                <button clrTabLink id="link1">Simulation 1</button>
+                <clr-tab-content id="content1" *clrIfActive>
+                    <div class="tab-content">
+                        <p>To begin, let&rsquo;s start with a very simplified (downscaled) model, just keeping in mind the real scale to ensure the chosen design will fit it.</p>
+                        <p>In our simulation, we consider:</p>
+                        <ul>
+                            <li>{{nbTimeSlots}} time slots per day, instead of 240</li>
+                            <li>An {{areaSideSize*5}}mx{{areaSideSize*5}}m area, giving a total of {{areaSideSize}}x{{areaSideSize}} unit locations</li>
+                        </ul>
+                        <p>Random generated location records:</p>
+                        <button class="btn btn-primary" (click)="individuals = createIndividuals()">Generate new records</button>
+                        <div class="clr-row">
+                            <div *ngFor="let individual of individuals" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
+                                <div>{{individual.name}} location record:</div>
+                                <textarea style="height: calc( 24px * {{nbTimeSlots}} + 4px)">{{locationRecord(individual)}}</textarea>
+                                <!-- <table>
+                                  <tbody>
+                                      <tr *ngFor="let itemY of [].constructor(areaSideSize); let y = index">
+                                          <td *ngFor="let itemX of [].constructor(areaSideSize); let x = index" class=" tab-cell">
+                                              <span *ngIf="isHere(individual, x, y)">{{whenHere(individual, x, y)}}</span>
+                                          </td>
+                                      </tr>
+                                  </tbody>
+                              </table> -->
+                            </div>
+                        </div>
+                        <p>Across time:</p>
+                        <div class="clr-row">
+                            <div *ngFor="let timeSlot of timeSlots" class="clr-col-6 clr-col-md-3 clr-col-lg-2 clr-col-xl-1">
+                                <div>time slot: {{timeSlot.time}}</div>
+                                <table>
+                                    <tbody>
+                                        <tr *ngFor="let locationRow of timeSlot.locations; let y = index;">
+                                            <td *ngFor="let locationCol of locationRow; let x = index;" class=" tab-cell left">{{whoIsHere(timeSlot.time, x, y)}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p>contacts:</p>
+                                <textarea style="margin: 12px; width: 80%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{detectContact(timeSlot)}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </clr-tab-content>
+            </clr-tab>
+            <clr-tab>
+                <button clrTabLink>Simulation 2</button>
+                <clr-tab-content *clrIfActive>
+                    <p>This simulation takes a few greater values for our hypothesis in order to analyse how our solution is scaling</p>
+                    <p>Now, we consider:</p>
+                    <ul>
+                        <li>12 time slots per day (1 each hour), instead of 240</li>
+                        <li>An 80mx80m area, giving a total of 16x16 unit locations</li>
+                    </ul>
+                </clr-tab-content>
+            </clr-tab>
+        </clr-tabs>
+    </article>
+</app-doc-wrapper>
