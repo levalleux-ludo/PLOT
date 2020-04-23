@@ -9,13 +9,17 @@ import { ClarityModule } from '@clr/angular';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { UiModule } from './ui/ui.module';
 import { NgxPageScrollModule } from 'ngx-page-scroll';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { UiRoutingModule } from './ui/ui-routing.module';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule,
+    UiRoutingModule, // must be put before main RouterModule
     AppRoutingModule,
     ClarityModule,
     BrowserAnimationsModule,
