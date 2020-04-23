@@ -103,7 +103,7 @@
                         <tr>
                             <td>Infected Zones:</td>
                             <td *ngFor="let timeSlot of timeSlots; let i = index;" style="min-width: 36px;">
-                                <textarea style="margin: 2px; width: 100%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{getGlobalInfectionAtTime(timeSlot.time)}}</textarea>
+                                <!-- <textarea style="margin: 2px; width: 100%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{getGlobalInfectionAtTime(timeSlot.time)}}</textarea> -->
                                 <table>
                                     <tbody>
                                         <tr *ngFor="let y of allY">
@@ -134,12 +134,12 @@
                         <tr *ngFor="let individual of individuals">
                             <td>{{individual.name}}</td>
                             <td *ngFor="let timeSlot of timeSlots; let i = index;">
-                                <p>
-                                    <span *ngIf="individual.infectedTime >= 0">N/A</span>
-                                    <span *ngIf="individual.infectedTime < 0">
-                                  {{computeRisk(individual, timeSlot)}}
-                                </span>
-                                </p>
+                                <span *ngIf="individual.infectedTime >= 0">N/A</span>
+                                <span *ngIf="individual.infectedTime < 0">
+                                  <!-- {{computeRisk(individual, timeSlot)}} -->
+                                    {{computeRisk_md(individual, timeSlot)}}<br>
+                                      {{computeScore_md(individual, timeSlot)}}
+                                  </span>
                             </td>
                         </tr>
                     </tbody>

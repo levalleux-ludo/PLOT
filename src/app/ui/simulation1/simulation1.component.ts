@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { randomInt } from 'src/app/_helpers/utils';
 import { returnOrFallthrough } from '@clr/core/common';
+import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 
 class Location {
   constructor(public x: number, public y: number) {}
@@ -19,6 +20,30 @@ interface Individual {name: string; locations: Location[]; infectedTime: number;
 
 interface TimeSlot {time: number; day: number; slotInDay: number; locations: Location[]; }
 
+
+function md_convert(time: number, x: number, y: number): number {
+  if (time >= 2 ** 8) {
+    throw new Error('Overflow on time value' + time);
+  }
+  if (x >= 2 ** 12) {
+    throw new Error('Overflow on x value' + x);
+  }
+  if (y >= 2 ** 12) {
+    throw new Error('Overflow on y value' + y);
+  }
+  // tslint:disable-next-line: no-bitwise
+  return (x << 20) + (y << 8) + time;
+}
+
+function md_parse(n: number): {time: number, x: number, y: number} {
+  // tslint:disable-next-line: no-bitwise
+  const time = n & 0xFF;
+  // tslint:disable-next-line: no-bitwise
+  const y = (n & 0xFFF00) >> 8;
+  // tslint:disable-next-line: no-bitwise
+  const x = (n & 0xFFF00000) >> 20;
+  return {time, x, y};
+}
 @Component({
   selector: 'app-simulation1',
   templateUrl: './simulation1.component.html',
@@ -40,7 +65,9 @@ export class Simulation1Component implements OnInit {
 
   individuals: Individual[] = this.createIndividuals();
 
-  globalInfectionReport : {locations: Location[]}[] = [];
+  globalInfectionReport: {locations: Location[]}[] = [];
+
+  md_globalInfectionReport: number[] = [];
 
   constructor() { }
 
@@ -185,13 +212,16 @@ export class Simulation1Component implements OnInit {
 
   refreshGlobalinfectionReport() {
     this.globalInfectionReport = [];
+    this.md_globalInfectionReport = [];
     for (let timeSlot of this.timeSlots) {
       const locations = [];
       for (let individual of this.individuals) {
         if (individual.infectedTime >= 0) {
           const infectedDay = Math.floor(individual.infectedTime / this.nbTimeSlotsPerDay);
           if (timeSlot.day >= infectedDay - this.incubationPeriod) {
-              locations.push(individual.locations[timeSlot.time]); // TODO: avoid duplicates
+            const location = individual.locations[timeSlot.time];
+            locations.push(location); // TODO: avoid duplicates
+            this.md_globalInfectionReport.push(md_convert(timeSlot.time, location.x, location.y));
           }
         }
       }
@@ -223,6 +253,30 @@ export class Simulation1Component implements OnInit {
       return nbContacts.toString();
     }
     return '';
+  }
+
+  computeRisk_md(individual: Individual, timeSlot: TimeSlot): string {
+    const indivLocation = individual.locations[timeSlot.time];
+    const md_value = md_convert(timeSlot.time, indivLocation.x, indivLocation.y);
+    if (this.md_globalInfectionReport.includes(md_value)) {
+      return '(+1)';
+    }
+    return '';
+  }
+
+  computeScore_md(individual: Individual, timeSlot: TimeSlot): string {
+    let nbContacts = 0;
+    for (let time = 0; time <= timeSlot.time; time++) {
+      const indivLocation = individual.locations[time];
+      const md_value = md_convert(time, indivLocation.x, indivLocation.y);
+      if (this.md_globalInfectionReport.includes(md_value)) {
+        nbContacts++;
+      }
+    }
+    if (nbContacts === 0) {
+      return '';
+    }
+    return nbContacts.toString();
   }
 
   isInfected(time: number, x: number, y: number) {
