@@ -1,27 +1,40 @@
 <app-doc-wrapper [title]="'Simulation 1'" [newLayout]="true" #docWrapper>
     <article #article id="article" class="simulations">
         <div class="tab-content">
+            <h3>Input data:</h3>
             <p>To begin, let&rsquo;s start with a very simplified (downscaled) model, just keeping in mind the real scale to ensure the chosen design will fit it.</p>
             <p>In our simulation, we consider:</p>
             <ul>
                 <li>{{nbTimeSlots}} time slots per day, instead of 240</li>
                 <li>An {{areaSideSize*5}}mx{{areaSideSize*5}}m area, giving a total of {{areaSideSize}}x{{areaSideSize}} unit locations</li>
+                <li>An infection incubation period of 5 days, instead of 15</li>
             </ul>
             <p>Change constants:</p>
             <form clrForm>
                 <clr-input-container>
                     <label>Nb of time slots per day: </label>
-                    <input clrInput #inputNbTimeSlots step="1" max="12" min="4" type="number" value="{{nbTimeSlots}}" placeholder="Nb of time slots per day">
+                    <input clrInput #inputNbTimeSlots step="1" max="6" min="4" type="number" value="{{nbTimeSlotsPerDay}}" placeholder="Nb of time slots per day">
                 </clr-input-container>
-                <button class="btn btn-primary" [disabled]="inputNbTimeSlots.value == nbTimeSlots" (click)="nbTimeSlots = inputNbTimeSlots.value; timeSlots=createTimeSlots(); individuals = createIndividuals();">Apply</button>
+                <button class="btn btn-primary" [disabled]="inputNbTimeSlots.value == nbTimeSlotsPerDay" (click)="nbTimeSlotsPerDay = inputNbTimeSlots.value; timeSlots=createTimeSlots(); individuals = createIndividuals(); refreshGlobalinfectionReport();">Apply</button>
+                <clr-input-container>
+                    <label>Nb of days: </label>
+                    <input clrInput #inputNbDays step="1" max="4" min="2" type="number" value="{{nbOfDays}}" placeholder="Nb of days">
+                </clr-input-container>
+                <button class="btn btn-primary" [disabled]="inputNbDays.value == nbOfDays" (click)="nbOfDays = inputNbDays.value; timeSlots=createTimeSlots(); individuals = createIndividuals(); refreshGlobalinfectionReport();">Apply</button>
                 <clr-input-container>
                     <label>Nb of unit location per side: </label>
                     <input clrInput #inputareaSideSize step="1" max="8" min="4" type="number" value="{{areaSideSize}}" placeholder="Nb of unit location per side">
                 </clr-input-container>
-                <button class="btn btn-primary" [disabled]="inputareaSideSize.value == areaSideSize" (click)="areaSideSize = inputareaSideSize.value; timeSlots=createTimeSlots(); individuals = createIndividuals();">Apply</button>
+                <button class="btn btn-primary" [disabled]="inputareaSideSize.value == areaSideSize" (click)="areaSideSize = inputareaSideSize.value; timeSlots=createTimeSlots(); individuals = createIndividuals(); refreshGlobalinfectionReport();">Apply</button>
+                <clr-input-container>
+                    <label>Infection incubation period: </label>
+                    <input clrInput #inputIncubationPeriod step="1" max="8" min="4" type="number" value="{{incubationPeriod}}" placeholder="Infection incubation period">
+                </clr-input-container>
+                <button class="btn btn-primary" [disabled]="inputIncubationPeriod.value == incubationPeriod" (click)="incubationPeriod = inputIncubationPeriod.value; refreshGlobalinfectionReport()">Apply</button>
             </form>
-            <p>Random generated location records:</p>
-            <button class="btn btn-primary" (click)="individuals = createIndividuals()">Generate new records</button>
+            <h3>Individuals' location records:</h3>
+            <p>These location records are rendomly generated for the simulation purpose</p>
+            <button class="btn btn-primary" (click)="individuals = createIndividuals();  refreshGlobalinfectionReport();">Generate new records</button>
             <div class="clr-row">
                 <div *ngFor="let individual of individuals" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
                     <div>{{individual.name}} location record:</div>
@@ -40,7 +53,8 @@
             <p>Across time:</p>
             <div class="clr-row">
                 <div *ngFor="let timeSlot of timeSlots" class="timeSlot {{getClassesForTable()}}">
-                    <div>time slot: {{timeSlot.time}}</div>
+                    <div>day: {{timeSlot.day}}</div>
+                    <div>slot: {{timeSlot.slotInDay}}</div>
                     <table>
                         <tbody>
                             <tr *ngFor="let locationRow of timeSlot.locations; let y = index;">
@@ -52,41 +66,85 @@
                     <textarea style="margin: 12px; width: 80%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{detectContact(timeSlot)}}</textarea>
                 </div>
             </div>
-            <p>Infection Status:</p>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <td>Name</td>
-                        <td *ngFor="let timeSlot of timeSlots; let i = index;">{{timeSlot.time}}</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let individual of individuals">
-                        <td>{{individual.name}}</td>
-                        <td *ngFor="let timeSlot of timeSlots; let i = index;">
-                            <input type="checkbox" clrCheckbox [checked]="individual.infectedTime >= 0 && individual.infectedTime <= timeSlot.time" [disabled]="individual.infectedTime >= 0 && individual.infectedTime < timeSlot.time" (change)="onChecked($event.target.checked, individual, timeSlot)"
-                            />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>Global Infection Record:</p>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <td>Time:</td>
-                        <td *ngFor="let timeSlot of timeSlots; let i = index;">{{timeSlot.time}}</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Infected Zones:</td>
-                        <td *ngFor="let timeSlot of timeSlots; let i = index;" style="min-width: 36px;">
-                            <textarea style="margin: 2px; width: 100%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{getGlobalInfectionAtTime(timeSlot.time)}}</textarea>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <h3>Infection Status:</h3>
+            <p>Check the box when the individual is declared infected</p>
+            <div style="overflow-x: auto; width: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>Time:</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                                d:{{timeSlot.day}},s:{{timeSlot.slotInDay}}
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let individual of individuals">
+                            <td>{{individual.name}}</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                                <input type="checkbox" clrCheckbox [checked]="individual.infectedTime >= 0 && individual.infectedTime <= timeSlot.time" (change)="onChecked($event, individual, timeSlot)" />
+                                <!-- <input type="checkbox" clrCheckbox [checked]="individual.infectedTime >= 0 && individual.infectedTime <= timeSlot.time" [disabled]="individual.infectedTime >= 0 && individual.infectedTime < timeSlot.time" (change)="onChecked($event.target.checked, individual, timeSlot)"
+                            /> -->
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Global Infection Record:</h3>
+            <div style="overflow-x: auto; width: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>Time:</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">{{timeSlot.time}}</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Infected Zones:</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;" style="min-width: 36px;">
+                                <textarea style="margin: 2px; width: 100%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{getGlobalInfectionAtTime(timeSlot.time)}}</textarea>
+                                <table>
+                                    <tbody>
+                                        <tr *ngFor="let y of allY">
+                                            <td *ngFor="let x of allX" class=" tab-cell" [ngClass]="{'red': isInfected(timeSlot.time, x, y)}">
+                                                <!-- <div *ngIf="isInfected(timeSlot.time, x, y)" style="background-color: red;">X</div> -->
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Infection Risk Assessment:</h3>
+            <p>This table show how many times each individual has been in contact with infected people in a given time slot</p>
+            <div style="overflow-x: auto; width: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>Time:</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                                d:{{timeSlot.day}},s:{{timeSlot.slotInDay}}
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let individual of individuals">
+                            <td>{{individual.name}}</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                                <p>
+                                    <span *ngIf="individual.infectedTime >= 0">N/A</span>
+                                    <span *ngIf="individual.infectedTime < 0">
+                                  {{computeRisk(individual, timeSlot)}}
+                                </span>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </article>
 </app-doc-wrapper>

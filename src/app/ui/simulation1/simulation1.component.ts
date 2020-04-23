@@ -17,7 +17,7 @@ class Location {
 
 interface Individual {name: string; locations: Location[]; infectedTime: number;}
 
-interface TimeSlot {time: number; locations: Location[]; }
+interface TimeSlot {time: number; day: number; slotInDay: number; locations: Location[]; }
 
 @Component({
   selector: 'app-simulation1',
@@ -30,8 +30,10 @@ interface TimeSlot {time: number; locations: Location[]; }
 })
 export class Simulation1Component implements OnInit {
 
-  nbTimeSlots = 12;
-  areaSideSize = 4;
+  nbTimeSlotsPerDay = 2;
+  nbOfDays = 5;
+  areaSideSize = 5;
+  incubationPeriod = 3;
   people = ['Alice', 'Bob', 'Charlie', 'Denise', 'Edward'];
 
   timeSlots: TimeSlot[] = this.createTimeSlots();
@@ -46,10 +48,16 @@ export class Simulation1Component implements OnInit {
     this.refreshGlobalinfectionReport();
   }
 
+  public get nbTimeSlots(): number {
+    return this.nbTimeSlotsPerDay * this.nbOfDays;
+  }
+
   createTimeSlots(): TimeSlot[] {
     const timeSlots = [];
-    for (let t = 0; t < this.nbTimeSlots; t++) {
-      const timeSlot = { time: t, locations: [] };
+    for (let d = 0; d < this.nbOfDays; d++) {
+      for (let s = 0; s < this.nbTimeSlotsPerDay; s++) {
+        const t = s + d * this.nbTimeSlotsPerDay;
+        const timeSlot = { time: t, day: d, slotInDay: s, locations: [] };
       for (let y = 0; y < this.areaSideSize; y++) {
         const locationRow = [];
         for (let x = 0; x < this.areaSideSize; x++) {
@@ -60,6 +68,7 @@ export class Simulation1Component implements OnInit {
         timeSlot.locations.push(locationRow);
       }
       timeSlots.push(timeSlot);
+    }
     }
     return timeSlots;
   }
@@ -162,8 +171,11 @@ export class Simulation1Component implements OnInit {
     return "clr-col-12 clr-col-md-6 clr-col-lg-4 clr-col-xl-3";
   }
 
-  onChecked(checked, individual, timeSlot) {
-    if (checked) {
+  onChecked(event, individual, timeSlot) {
+    if (event.target.checked) {
+      individual.infectedTime = timeSlot.time;
+    } else if ((individual.infectedTime >= 0) && (individual.infectedTime < timeSlot.time)) {
+      event.target.checked = true; // stay checked
       individual.infectedTime = timeSlot.time;
     } else {
       individual.infectedTime = -1;
@@ -176,8 +188,11 @@ export class Simulation1Component implements OnInit {
     for (let timeSlot of this.timeSlots) {
       const locations = [];
       for (let individual of this.individuals) {
-        if ((individual.infectedTime >= 0) && (individual.infectedTime <= timeSlot.time)) {
-          locations.push(individual.locations[timeSlot.time]); // TODO: avoid duplicates
+        if (individual.infectedTime >= 0) {
+          const infectedDay = Math.floor(individual.infectedTime / this.nbTimeSlotsPerDay);
+          if (timeSlot.day >= infectedDay - this.incubationPeriod) {
+              locations.push(individual.locations[timeSlot.time]); // TODO: avoid duplicates
+          }
         }
       }
       this.globalInfectionReport.push({locations});
@@ -193,6 +208,46 @@ export class Simulation1Component implements OnInit {
       report += location.toString();
     }
     return report;
+  }
+
+  computeRisk(individual: Individual, timeSlot: TimeSlot): string {
+    let nbContacts = 0;
+    // compute intersection between individual record and the global one
+    const indivLocation = individual.locations[timeSlot.time];
+    for (const  location of this.globalInfectionReport[timeSlot.time].locations) {
+      if (location.equals(indivLocation)) {
+        nbContacts++;
+      }
+    }
+    if (nbContacts > 0) {
+      return nbContacts.toString();
+    }
+    return '';
+  }
+
+  isInfected(time: number, x: number, y: number) {
+    for (const location of this.globalInfectionReport[time].locations) {
+      if (location.equalsTo(x ,y )) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public get allX(): number[] {
+    const allX = []
+    for (let x = 0; x < this.areaSideSize; x++) {
+      allX.push(x);
+    }
+    return allX;
+  }
+
+  public get allY(): number[] {
+    const allY = []
+    for (let y = 0; y < this.areaSideSize; y++) {
+      allY.push(y);
+    }
+    return allY;
   }
 
 }
