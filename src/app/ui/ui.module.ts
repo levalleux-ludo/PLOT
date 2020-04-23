@@ -16,7 +16,8 @@ import { DocWrapperComponent } from './layout/doc-wrapper/doc-wrapper.component'
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { PresentationComponent } from './presentation/presentation.component';
 import { ScrollDispatcher, ScrollingModule } from '@angular/cdk/scrolling';
-import { SimulationComponent } from './simulation/simulation.component';
+import { Simulation1Component } from './simulation1/simulation1.component';
+import { Simulation2Component } from './simulation2/simulation2.component';
 
 
 
@@ -34,7 +35,8 @@ import { SimulationComponent } from './simulation/simulation.component';
     SettingsComponent,
     DocWrapperComponent,
     PresentationComponent,
-    SimulationComponent
+    Simulation1Component,
+    Simulation2Component
   ],
   imports: [
     CommonModule,

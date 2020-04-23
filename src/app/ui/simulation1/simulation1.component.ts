@@ -20,15 +20,15 @@ interface Individual {name: string; locations: Location[]; infectedTime: number;
 interface TimeSlot {time: number; locations: Location[]; }
 
 @Component({
-  selector: 'app-simulation',
-  templateUrl: './simulation.component.html',
-  styleUrls: ['./simulation.component.scss'],
+  selector: 'app-simulation1',
+  templateUrl: './simulation1.component.html',
+  styleUrls: ['./simulation1.component.scss'],
   host: {
     '[class.dox-content-panel]': 'true',
     '[class.content-area]': 'true'
   }
 })
-export class SimulationComponent implements OnInit {
+export class Simulation1Component implements OnInit {
 
   nbTimeSlots = 12;
   areaSideSize = 4;
