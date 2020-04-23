@@ -3,7 +3,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "test-clarity": {
+        "plot": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -17,7 +17,7 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:browser",
                     "options": {
-                        "outputPath": "dist/test-clarity",
+                        "outputPath": "dist/plot",
                         "index": "src/index.html",
                         "main": "src/main.ts",
                         "polyfills": "src/polyfills.ts",
@@ -69,18 +69,18 @@
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
                     "options": {
-                        "browserTarget": "test-clarity:build"
+                        "browserTarget": "plot:build"
                     },
                     "configurations": {
                         "production": {
-                            "browserTarget": "test-clarity:build:production"
+                            "browserTarget": "plot:build:production"
                         }
                     }
                 },
                 "extract-i18n": {
                     "builder": "@angular-devkit/build-angular:extract-i18n",
                     "options": {
-                        "browserTarget": "test-clarity:build"
+                        "browserTarget": "plot:build"
                     }
                 },
                 "test": {
@@ -117,18 +117,18 @@
                     "builder": "@angular-devkit/build-angular:protractor",
                     "options": {
                         "protractorConfig": "e2e/protractor.conf.js",
-                        "devServerTarget": "test-clarity:serve"
+                        "devServerTarget": "plot:serve"
                     },
                     "configurations": {
                         "production": {
-                            "devServerTarget": "test-clarity:serve:production"
+                            "devServerTarget": "plot:serve:production"
                         }
                     }
                 }
             }
         }
     },
-    "defaultProject": "test-clarity",
+    "defaultProject": "plot",
     "cli": {
         "analytics": false
     }
