@@ -376,9 +376,13 @@ export class Simulation1Component implements OnInit {
     return '';
   }
 
-  public serializedBloomSize(day: number) {
+  public serializedBloomSize(day: number): number {
     const bloom = this.bloomPerDay.get(day);
-    return bloom.buckets.length;
+    if (bloom) {
+      return bloom.buckets.length;
+    } else {
+      return 0;
+    }
   }
 
   computeScore_bloom(individual: Individual, timeSlot: TimeSlot): string {
