@@ -2,6 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { randomInt } from 'src/app/_helpers/utils';
 import { returnOrFallthrough } from '@clr/core/common';
 import { assertNotNull } from '@angular/compiler/src/output/output_ast';
+import { BloomFilter } from 'bloomfilter';
+import { buildMapFromList } from '@angular/flex-layout/extended/typings/style/style-transforms';
+
+
 
 class Location {
   constructor(public x: number, public y: number) {}
@@ -67,7 +71,11 @@ export class Simulation1Component implements OnInit {
 
   globalInfectionReport: {locations: Location[]}[] = [];
 
-  md_globalInfectionReport: number[] = [];
+  md_globalInfectionReport: Map<number, number[]> = new Map();
+
+  bloomPerDay: Map<number, BloomFilter> = new Map();
+
+  bloomSize = 256;
 
   constructor() { }
 
@@ -212,7 +220,23 @@ export class Simulation1Component implements OnInit {
 
   refreshGlobalinfectionReport() {
     this.globalInfectionReport = [];
-    this.md_globalInfectionReport = [];
+    this.md_globalInfectionReport = new Map();
+    for (const day of this.allDays) {
+      const dayInfectedLocations = [];
+      for (const slot of this.allSlotsInDay) {
+        const time = day * this.nbTimeSlotsPerDay + slot;
+        for (const individual of this.individuals) {
+          if (individual.infectedTime >= 0) {
+            const infectedDay = Math.floor(individual.infectedTime / this.nbTimeSlotsPerDay);
+            if (day >= infectedDay - this.incubationPeriod) {
+              const location = individual.locations[time];
+              dayInfectedLocations.push(md_convert(slot, location.x, location.y));
+            }
+          }
+        }
+      }
+      this.md_globalInfectionReport.set(day, dayInfectedLocations);
+    }
     for (let timeSlot of this.timeSlots) {
       const locations = [];
       for (let individual of this.individuals) {
@@ -221,7 +245,6 @@ export class Simulation1Component implements OnInit {
           if (timeSlot.day >= infectedDay - this.incubationPeriod) {
             const location = individual.locations[timeSlot.time];
             locations.push(location); // TODO: avoid duplicates
-            this.md_globalInfectionReport.push(md_convert(timeSlot.time, location.x, location.y));
           }
         }
       }
@@ -229,16 +252,16 @@ export class Simulation1Component implements OnInit {
     }
   }
 
-  getGlobalInfectionAtTime(time: number): string {
-    let report = '';
-    for (const location of this.globalInfectionReport[time].locations) {
-      if (report !== '') {
-        report += '\n';
-      }
-      report += location.toString();
-    }
-    return report;
-  }
+  // getGlobalInfectionAtTime(time: number): string {
+  //   let report = '';
+  //   for (const location of this.globalInfectionReport[time].locations) {
+  //     if (report !== '') {
+  //       report += '\n';
+  //     }
+  //     report += location.toString();
+  //   }
+  //   return report;
+  // }
 
   computeRisk(individual: Individual, timeSlot: TimeSlot): string {
     let nbContacts = 0;
@@ -256,10 +279,20 @@ export class Simulation1Component implements OnInit {
   }
 
   computeRisk_md(individual: Individual, timeSlot: TimeSlot): string {
-    const indivLocation = individual.locations[timeSlot.time];
-    const md_value = md_convert(timeSlot.time, indivLocation.x, indivLocation.y);
-    if (this.md_globalInfectionReport.includes(md_value)) {
-      return '(+1)';
+    let nbContacts = 0;
+    const day = timeSlot.day;
+    const dayInfectedLocations = this.md_globalInfectionReport.get(day);
+    const maxSlot = timeSlot.slotInDay;
+    for (let slot = 0; slot <= maxSlot; slot++) {
+      const time = day * this.nbTimeSlotsPerDay + slot;
+      const indivLocation = individual.locations[time];
+      const md_value = md_convert(slot, indivLocation.x, indivLocation.y);
+      if (dayInfectedLocations.includes(md_value)) {
+        nbContacts++;
+      }
+    }
+    if (nbContacts > 0) {
+      return `(+${nbContacts})`;
     }
     return '';
   }
@@ -267,9 +300,12 @@ export class Simulation1Component implements OnInit {
   computeScore_md(individual: Individual, timeSlot: TimeSlot): string {
     let nbContacts = 0;
     for (let time = 0; time <= timeSlot.time; time++) {
+      const day = Math.floor(time / this.nbTimeSlotsPerDay);
+      const slot = time - (day * this.nbTimeSlotsPerDay);
+      const dayInfectedLocations = this.md_globalInfectionReport.get(day);
       const indivLocation = individual.locations[time];
-      const md_value = md_convert(time, indivLocation.x, indivLocation.y);
-      if (this.md_globalInfectionReport.includes(md_value)) {
+      const md_value = md_convert(slot, indivLocation.x, indivLocation.y);
+      if (dayInfectedLocations.includes(md_value)) {
         nbContacts++;
       }
     }
@@ -288,20 +324,84 @@ export class Simulation1Component implements OnInit {
     return false;
   }
 
-  public get allX(): number[] {
-    const allX = []
-    for (let x = 0; x < this.areaSideSize; x++) {
-      allX.push(x);
+  private createIntArray(start: number, nbElem: number): number[] {
+    const table = []
+    for (let i = start; i < start + nbElem; i++) {
+      table.push(i);
     }
-    return allX;
+    return table;
+  }
+
+  public get allX(): number[] {
+    return this.createIntArray(0, this.areaSideSize);
   }
 
   public get allY(): number[] {
-    const allY = []
-    for (let y = 0; y < this.areaSideSize; y++) {
-      allY.push(y);
-    }
-    return allY;
+    return this.createIntArray(0, this.areaSideSize);
   }
+
+  public get allDays(): number[] {
+    return this.createIntArray(0, this.nbOfDays);
+  }
+
+  public get allSlotsInDay(): number[] {
+    return this.createIntArray(0, this.nbTimeSlotsPerDay);
+  }
+
+  public md_parse(md_val: number): string {
+    const {time, x, y} = md_parse(md_val);
+    return `${time}:(${x},${y})`;
+  }
+
+  public computeBloomForDay(day: number) {
+    const bloom = new BloomFilter(32 * this.bloomSize, 16);
+    const dayInfectedLocations = this.md_globalInfectionReport.get(day);
+    for (const md_val of dayInfectedLocations) {
+      bloom.add(md_val);
+    }
+    this.bloomPerDay.set(day, bloom);
+  }
+
+  public computeBlooms() {
+    for (const day of this.allDays) {
+      this.computeBloomForDay(day);
+    }
+  }
+
+  public serializeBloom(day: number) {
+    const bloom = this.bloomPerDay.get(day);
+    if (bloom) {
+      return JSON.stringify([].slice.call(bloom.buckets));
+    }
+    return '';
+  }
+
+  public serializedBloomSize(day: number) {
+    const bloom = this.bloomPerDay.get(day);
+    return bloom.buckets.length;
+  }
+
+  computeScore_bloom(individual: Individual, timeSlot: TimeSlot): string {
+    let nbContacts = 0;
+    if (this.bloomPerDay.size > 0) {
+      for (let time = 0; time <= timeSlot.time; time++) {
+        const day = Math.floor(time / this.nbTimeSlotsPerDay);
+        const slot = time - (day * this.nbTimeSlotsPerDay);
+        const bloom = this.bloomPerDay.get(day);
+        const indivLocation = individual.locations[time];
+        const md_value = md_convert(slot, indivLocation.x, indivLocation.y);
+        if (bloom.test(md_value)) {
+          nbContacts++;
+        }
+      }
+    }
+    if (nbContacts === 0) {
+      return '';
+    }
+    return nbContacts.toString();
+  }
+
+
+
 
 }

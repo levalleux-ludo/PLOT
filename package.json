@@ -25,9 +25,13 @@
         "@clr/core": "^3.1.0",
         "@clr/icons": "^3.1.0",
         "@clr/ui": "^3.1.0",
+        "@types/bloomfilter": "0.0.0",
         "@webcomponents/webcomponentsjs": "^2.4.3",
+        "bloomfilter": "0.0.18",
+        "i": "^0.3.6",
         "ngx-page-scroll": "^7.0.1",
         "ngx-page-scroll-core": "^7.0.1",
+        "npm": "^6.14.4",
         "rxjs": "~6.5.4",
         "tslib": "^1.10.0",
         "zone.js": "~0.10.2"

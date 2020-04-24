@@ -118,6 +118,35 @@
                     </tbody>
                 </table>
             </div>
+            <h3>Encoding Global Infection Record</h3>
+            <div>
+                <p>To prepare the global infection record to be published (for instance on a distributed ledger), and encrypted in such a way that we could evaluate an individual infection risk, we store data in a mono-dimensional set structure.</p>
+                <p>Say we have now the global infection record as a set of N*M uint32 for each given day, with:</p>
+                <ul>
+                    <li> N is the number of time slots in a day,</li>
+                    <li> M is the number of infected people on that day,</li>
+                    <li> each uint32 is a encoded value of the tuple (x, y, ts) meaning that the location (x,y) is infected at the time slot ts in the given day</li>
+                </ul>
+            </div>
+            <div class="clr-row">
+                <div *ngFor="let day of allDays" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>Global Infection Record day {{day}}</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let md_val of md_globalInfectionReport.get(day)">
+                                <td>{{md_val}} - {{md_parse(md_val)}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <p>Note: a small optimization can be done when we can avoid duplicate values in each set. Hence N*M is the maximum dimension of a day global infection record.</p>
+            </div>
             <h3>Infection Risk Assessment:</h3>
             <p>This table show how many times each individual has been in contact with infected people in a given time slot</p>
             <div style="overflow-x: auto; width: auto;">
@@ -140,6 +169,61 @@
                                     {{computeRisk_md(individual, timeSlot)}}<br>
                                       {{computeScore_md(individual, timeSlot)}}
                                   </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Bloom Filters experimentation</h3>
+            <div>
+                <p>Using Bloom Filter may allow us:</p>
+                <ul>
+                    <li> to reduce the amount of data published on the distributed ledger (?),</li>
+                    <li> to encrypt published data so that we can look for intersections between set of values without revealing the real data</li>
+                </ul>
+                <form clrForm>
+                    <clr-input-container>
+                        <label>Bloom size (in 32bits words): </label>
+                        <input clrInput #inputNbTimeSlots step="64" max="1024" min="64" type="number" value="{{bloomSize}}" (change)="bloomSize = $event.target.value" placeholder="Bloom size">
+                    </clr-input-container>
+                </form>
+                <button class="btn btn-primary" (click)="computeBlooms()">Compute</button>
+                <div class="clr-row">
+                    <div *ngFor="let day of allDays" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td>Global Infection Record day {{day}}</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <td>
+                                    <textarea>{{serializeBloom(day)}}</textarea> size:{{4*serializedBloomSize(day)}} octets
+                                </td>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div style="overflow-x: auto; width: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td>Time:</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                                d:{{timeSlot.day}},s:{{timeSlot.slotInDay}}
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let individual of individuals">
+                            <td>{{individual.name}}</td>
+                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                                <span *ngIf="individual.infectedTime >= 0">N/A</span>
+                                <span *ngIf="individual.infectedTime < 0">
+                                    {{computeScore_bloom(individual, timeSlot)}}
+                                </span>
                             </td>
                         </tr>
                     </tbody>
