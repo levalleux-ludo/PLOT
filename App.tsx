@@ -1,12 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import RootNavigator from './RootNavigator';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-    </View>
-  );
+  return RootNavigator();
 }
 
 const styles = StyleSheet.create({
