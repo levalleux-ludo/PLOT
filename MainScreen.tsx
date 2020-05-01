@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { Container, Content, Footer, FooterTab, Button, Icon } from 'native-base';
 import { StyleSheet, Dimensions, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import MapView, { Marker, Circle, Region } from 'react-native-maps';
 import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location } from '@mauron85/react-native-background-geolocation';
-const TrackingDot = require('./res/TrackingDot.png');
+import MapComponent from './MapComponent';
 
 class MainScreen extends Component {
 
@@ -144,20 +143,11 @@ class MainScreen extends Component {
     }
     
     render() {
-        const { height, width } = Dimensions.get('window');
         const { locations, stationaries, region, isRunning }: any = this.state;
         return (
             <Container>
                 <Content>
-                  <MapView style={{ width, height }} region={region}>
-                    {locations.map((location: Location, idx: number) => (
-                      <Marker
-                        key={idx}
-                        coordinate={location}
-                        image={TrackingDot}
-                      />
-                    ))}
-                  </MapView>
+                  <MapComponent region={region} locations={locations}></MapComponent>
                 </Content>
                 <Footer style={styles.footer}>
                 <FooterTab>
