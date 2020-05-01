@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Container, Content, Footer, FooterTab, Button, Icon } from 'native-base';
 import { StyleSheet, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import MapView, { Marker, Circle } from 'react-native-maps';
 
 class MainScreen extends Component {
 
@@ -32,7 +33,8 @@ class MainScreen extends Component {
         return (
             <Container>
                 <Content>
-
+                  <MapView style={{ width, height }} region={region}>
+                  </MapView>
                 </Content>
                 <Footer style={styles.footer}>
                 <FooterTab>

@@ -122,6 +122,15 @@ def jscFlavor = 'org.webkit:android-jsc:+'
  */
 def enableHermes = project.ext.react.get("enableHermes", false);
 
+/**
+ * To allow googleMapApiKey to be defined in env vars 
+**/
+def googleMapApiKey = System.getenv("googleMapApiKey");
+if (googleMapApiKey == null) {
+    throw new GradleException("Please export 'googleMapApiKey' variable in your build environment");
+}
+System.out.println("googleMapApiKey=" + googleMapApiKey);
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -136,6 +145,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [ googleMapApiKey:googleMapApiKey ]
     }
     splits {
         abi {
@@ -182,6 +192,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-maps')
     implementation project(':react-native-vector-icons')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules

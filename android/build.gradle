@@ -20,6 +20,7 @@ buildscript {
 }
 
 allprojects {
+    buildDir = "C:/tmp/${rootProject.name}/${project.name}"
     repositories {
         mavenLocal()
         maven {
@@ -35,4 +36,11 @@ allprojects {
         jcenter()
         maven { url 'https://jitpack.io' }
     }
+}
+
+/**
+ + Project-wide Gradle configuration properties
+ */
+ext {
+    playServicesVersion = "17.0.0" // or find latest version
 }
