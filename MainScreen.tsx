@@ -2,20 +2,26 @@ import React, { Component } from 'react';
 import { Container, Content, Footer, FooterTab, Button, Icon } from 'native-base';
 import { StyleSheet, Dimensions, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import MapView, { Marker, Circle } from 'react-native-maps';
-import BackgroundGeolocation, { ServiceStatus } from '@mauron85/react-native-background-geolocation';
+import MapView, { Marker, Circle, Region } from 'react-native-maps';
+import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location } from '@mauron85/react-native-background-geolocation';
+const TrackingDot = require('./res/TrackingDot.png');
 
 class MainScreen extends Component {
 
+  state: {
+    region: Region | undefined,
+    locations: Location[],
+    stationaries: StationaryLocation[],
+    isRunning: boolean
+  } = {
+    region: undefined,
+    locations: [],
+    stationaries: [],
+    isRunning: false
+  };
+
     constructor(props: any) {
         super(props);
-        this.state = {
-          region: null,
-          locations: [],
-          stationaries: [],
-          isRunning: false
-        };
-    
         this.goToSettings = this.goToSettings.bind(this);
     }
 
@@ -30,22 +36,27 @@ class MainScreen extends Component {
         startOnBoot: false,
         stopOnTerminate: true,
         locationProvider: BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
-        interval: 10000,
-        fastestInterval: 5000,
-        activitiesInterval: 10000,
+        interval: 1000,
+        fastestInterval: 500,
+        activitiesInterval: 1000,
         stopOnStillActivity: false
       });
 
-      BackgroundGeolocation.on('location', (location) => {
-        // handle your locations here
-        console.log('[INFO] location:', location);
-        // to perform long running operation on iOS
-        // you need to create background task
+      BackgroundGeolocation.on('location', location => {
+        console.log('[DEBUG] BackgroundGeolocation location', location);
         BackgroundGeolocation.startTask(taskKey => {
-          // execute long running task
-          // eg. ajax post location
-          // IMPORTANT: task has to be ended by endTask
-          BackgroundGeolocation.endTask(taskKey);
+          requestAnimationFrame(() => {
+            const longitudeDelta = 0.01;
+            const latitudeDelta = 0.01;
+            const region = Object.assign({}, location, {
+              latitudeDelta,
+              longitudeDelta
+            });
+            const locations = this.state.locations.slice(0);
+            locations.push(location);
+            this.setState({ locations, region });
+            BackgroundGeolocation.endTask(taskKey);
+          });
         });
       });
   
@@ -95,6 +106,26 @@ class MainScreen extends Component {
         }
       });
 
+      BackgroundGeolocation.getCurrentLocation(lastLocation => {
+        this.refreshRegion(lastLocation);
+      }, (error) => {
+        setTimeout(() => {
+          Alert.alert('Error obtaining current location', JSON.stringify(error));
+        }, 100);
+      });
+
+    }
+
+    refreshRegion(location: Location) {
+      let region = this.state.region;
+      const latitudeDelta = 0.01;
+      const longitudeDelta = 0.01;
+      region = Object.assign({}, location, {
+        latitudeDelta,
+        longitudeDelta
+      });
+      console.log('[INFO] Set region:' + region);
+      this.setState({ locations: [location], region });
     }
 
     componentWillUnmount() {
@@ -119,6 +150,13 @@ class MainScreen extends Component {
             <Container>
                 <Content>
                   <MapView style={{ width, height }} region={region}>
+                    {locations.map((location: Location, idx: number) => (
+                      <Marker
+                        key={idx}
+                        coordinate={location}
+                        image={TrackingDot}
+                      />
+                    ))}
                   </MapView>
                 </Content>
                 <Footer style={styles.footer}>
