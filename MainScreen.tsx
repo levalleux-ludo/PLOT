@@ -45,8 +45,8 @@ class MainScreen extends Component {
         console.log('[DEBUG] BackgroundGeolocation location', location);
         BackgroundGeolocation.startTask(taskKey => {
           requestAnimationFrame(() => {
-            const longitudeDelta = 0.01;
-            const latitudeDelta = 0.01;
+            const longitudeDelta = 0.0001;
+            const latitudeDelta = 0.0001;
             const region = Object.assign({}, location, {
               latitudeDelta,
               longitudeDelta
@@ -117,8 +117,8 @@ class MainScreen extends Component {
 
     refreshRegion(location: Location) {
       let region = this.state.region;
-      const latitudeDelta = 0.01;
-      const longitudeDelta = 0.01;
+      const latitudeDelta = 0.0001;
+      const longitudeDelta = 0.0001;
       region = Object.assign({}, location, {
         latitudeDelta,
         longitudeDelta
