@@ -1,8 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import RootNavigator from './RootNavigator';
+import LocationService from './LocationService';
 
 export default function App() {
+  LocationService.initialize();
   return RootNavigator();
 }
 

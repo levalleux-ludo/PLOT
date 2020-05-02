@@ -4,16 +4,22 @@ import { StyleSheet, Dimensions, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location } from '@mauron85/react-native-background-geolocation';
 import MapComponent from './MapComponent';
+import { Region, LatLng } from 'react-native-maps';
+import LocationService, { LocationArea } from './LocationService';
 
+const defaultLatitudeDelta = 0.015;
+const defaultLongitudeDelta = 0.0121;
 class MainScreen extends Component {
 
   state: {
     region: Region | undefined,
-    locations: Location[],
+    zoomFactor: number,
+    locations: LatLng[],
     stationaries: StationaryLocation[],
     isRunning: boolean
   } = {
     region: undefined,
+    zoomFactor: 1,
     locations: [],
     stationaries: [],
     isRunning: false
@@ -25,111 +31,40 @@ class MainScreen extends Component {
     }
 
     componentDidMount() {
-      BackgroundGeolocation.configure({
-        desiredAccuracy: BackgroundGeolocation.MEDIUM_ACCURACY,
-        stationaryRadius: 5,
-        distanceFilter: 5,
-        notificationTitle: 'Background tracking',
-        notificationText: 'enabled',
-        debug: false,
-        startOnBoot: false,
-        stopOnTerminate: true,
-        locationProvider: BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
-        interval: 1000,
-        fastestInterval: 500,
-        activitiesInterval: 1000,
-        stopOnStillActivity: false
+      LocationService.onLocationChanged.attach((area) => {
+        console.log("LocationService.onLocationChanged", area);
+          this.refreshRegion(area.toLatLng());
       });
-
-      BackgroundGeolocation.on('location', location => {
-        console.log('[DEBUG] BackgroundGeolocation location', location);
-        BackgroundGeolocation.startTask(taskKey => {
-          requestAnimationFrame(() => {
-            const longitudeDelta = 0.0001;
-            const latitudeDelta = 0.0001;
-            const region = Object.assign({}, location, {
-              latitudeDelta,
-              longitudeDelta
-            });
-            const locations = this.state.locations.slice(0);
-            locations.push(location);
-            this.setState({ locations, region });
-            BackgroundGeolocation.endTask(taskKey);
-          });
-        });
-      });
-  
-      BackgroundGeolocation.on('stationary', (stationaryLocation) => {
-        // handle stationary locations here
-        console.log('[INFO] stationaryLocation:', stationaryLocation);
-      });
-
-      BackgroundGeolocation.on('error', (error) => {
-        console.log('[ERROR] BackgroundGeolocation error:', error);
-      });
-  
-      BackgroundGeolocation.on('start', () => {
-        console.log('[INFO] BackgroundGeolocation service has been started');
-      });
-  
-      BackgroundGeolocation.on('stop', () => {
-        console.log('[INFO] BackgroundGeolocation service has been stopped');
-      });
-  
-      BackgroundGeolocation.on('authorization', (status) => {
-        console.log('[INFO] BackgroundGeolocation authorization status: ' + status);
-        if (status !== BackgroundGeolocation.AUTHORIZED) {
-          // we need to set delay or otherwise alert may not be shown
-          setTimeout(() =>
-            Alert.alert('App requires location tracking permission', 'Would you like to open app settings?', [
-              { text: 'Yes', onPress: () => BackgroundGeolocation.showAppSettings() },
-              { text: 'No', onPress: () => console.log('No Pressed'), style: 'cancel' }
-            ]), 1000);
-        }
-      });
-  
-      BackgroundGeolocation.on('background', () => {
-        console.log('[INFO] App is in background');
-      });
-  
-      BackgroundGeolocation.on('foreground', () => {
-        console.log('[INFO] App is in foreground');
-      });
-
-      BackgroundGeolocation.checkStatus((status: ServiceStatus) => {
-        console.log('[INFO] BackgroundGeolocation service is running', status.isRunning);
-        console.log('[INFO] BackgroundGeolocation services enabled', status.locationServicesEnabled);
-        console.log('[INFO] BackgroundGeolocation auth status: ' + status.authorization);
-        if (!status.isRunning) {
-          BackgroundGeolocation.start(); //triggers start on start event
-        }
-      });
-
-      BackgroundGeolocation.getCurrentLocation(lastLocation => {
-        this.refreshRegion(lastLocation);
-      }, (error) => {
-        setTimeout(() => {
-          Alert.alert('Error obtaining current location', JSON.stringify(error));
-        }, 100);
-      });
-
+      LocationService.onStatusChanged.attach((running) => {
+        this.setState({ isRunning: running });
+      })
+      if (LocationService.lastLocation) {
+        this.refreshRegion(LocationService.lastLocation.toLatLng());
+      }
     }
 
-    refreshRegion(location: Location) {
+    refreshRegion(location?: LatLng) {
       let region = this.state.region;
-      const latitudeDelta = 0.0001;
-      const longitudeDelta = 0.0001;
-      region = Object.assign({}, location, {
-        latitudeDelta,
-        longitudeDelta
-      });
-      console.log('[INFO] Set region:' + region);
-      this.setState({ locations: [location], region });
-    }
+      let newLocation = location;
+      if (!newLocation && region) {
+        newLocation = {latitude: region.latitude, longitude: region.longitude};
+      }
+      console.log("refreshRegion");
+      if (newLocation) {
+        region = Object.assign({}, {
+            latitude: newLocation.latitude,
+            longitude: newLocation.longitude,
+            latitudeDelta: defaultLatitudeDelta*this.state.zoomFactor,
+            longitudeDelta: defaultLongitudeDelta*this.state.zoomFactor
+        });
+        let locations = this.state.locations;
+        locations.push(newLocation);
+        console.log('[INFO] Set region:' + region);
+        this.setState({ locations, region });
+      }
+  }
 
     componentWillUnmount() {
-      // unregister all event listeners
-      BackgroundGeolocation.removeAllListeners();
     }
   
 
@@ -139,15 +74,42 @@ class MainScreen extends Component {
     }
 
     toggleTracking() {
-
+      LocationService.toggleTracking();
     }
-    
+
+    onRegionChange = (region: Region) => {
+      const zoomFactor = Math.min(region.latitudeDelta/defaultLatitudeDelta, region.longitudeDelta/defaultLongitudeDelta);
+      console.log("onRegionChange", region, "zoomFactor", zoomFactor);
+      this.setState({ region, zoomFactor });
+    }
+
+    onPressZoomIn = () => {
+      const zoomFactor = this.state.zoomFactor / 1.2;
+      console.log("onPressZoomIn zoomFactor", zoomFactor);
+      this.setState({ zoomFactor });
+      this.refreshRegion();
+    }
+
+    onPressZoomOut = () => {
+      const zoomFactor = this.state.zoomFactor * 1.2;
+      console.log("onPressZoomOut zoomFactor", zoomFactor);
+      this.setState({ zoomFactor });
+      this.refreshRegion();
+    }
+        
     render() {
         const { locations, stationaries, region, isRunning }: any = this.state;
         return (
             <Container>
                 <Content>
-                  <MapComponent region={region} locations={locations}></MapComponent>
+                  <MapComponent
+                   region={region}
+                   locations={locations}
+                   onRegionChange={this.onRegionChange}
+                   onPressZoomIn={this.onPressZoomIn}
+                   onPressZoomOut={this.onPressZoomOut}
+                   >
+                   </MapComponent>
                 </Content>
                 <Footer style={styles.footer}>
                 <FooterTab>

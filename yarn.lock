@@ -1235,6 +1235,13 @@
   dependencies:
     plist "^3.0.1"
 
+"@react-native-community/async-storage@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/async-storage/-/async-storage-1.9.0.tgz#af26a8879bd2987970fbbe81a9623851d29a56f1"
+  integrity sha512-TlGMr02JcmY4huH1P7Mt7p6wJecosPpW+09+CwCFLn875IhpRqU2XiVA+BQppZOYfQdHUfUzIKyCBeXOlCEbEg==
+  dependencies:
+    deep-assign "^3.0.0"
+
 "@react-native-community/cli-debugger-ui@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-debugger-ui/-/cli-debugger-ui-3.0.0.tgz#d01d08d1e5ddc1633d82c7d84d48fff07bd39416"
@@ -7098,6 +7105,11 @@ tr46@^1.0.1:
   integrity sha1-qLE/1r/SSJUZZ0zN5VujaTtwbQk=
   dependencies:
     punycode "^2.1.0"
+
+ts-events@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/ts-events/-/ts-events-3.4.0.tgz#08191aabfeec65a1141fbb2c7344a2737eb39fc5"
+  integrity sha512-WRTuuxHzqCVJUs4ZpHp82z2SFv1kp2Bodr8w4WIg0qFSce3sax/BN8kfWEOdWun4IKEglpGPK5FCEyGB3EwR3w==
 
 tunnel-agent@^0.6.0:
   version "0.6.0"

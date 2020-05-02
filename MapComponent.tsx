@@ -1,16 +1,25 @@
 import React, { Component } from 'react';
 import MapView, { Marker, Circle, Region, AnimatedRegion, LatLng, Polygon } from 'react-native-maps';
-import { Dimensions } from 'react-native';
+import { Dimensions, TouchableOpacity, StyleSheet } from 'react-native';
+import { Fab, Icon, View } from 'native-base';
 const TrackingDot = require('./res/TrackingDot.png');
 
 function reduce(coord: number): number {
     return Math.floor(coord * 20000)/20000; // reduce at 0.00005
 }
 
-const MapComponent = (props: {locations: Location[], region: Region}) => {
+interface MyProps {
+    locations: LatLng[],
+    region: Region,
+    onRegionChange: (region: Region) => void,
+    onPressZoomIn: () => void,
+    onPressZoomOut: () => void
+}
+
+const MapComponent = (props: MyProps) => {
     const { height, width } = Dimensions.get('window');
     const polygons = [];
-    if (props.region) {
+    if (props.region && (props.region.latitudeDelta < 0.0001) && (props.region.longitudeDelta < 0.0001)) {
         console.log("region", JSON.stringify(props.region));
         const lati1 = reduce(props.region.latitude - 2 * props.region.latitudeDelta);
         const lati2 = reduce(props.region.latitude + 2 * props.region.latitudeDelta);
@@ -36,25 +45,73 @@ const MapComponent = (props: {locations: Location[], region: Region}) => {
     console.log("[INFO] Nb Polygons: ", polygons.length);
 
     return (
-        <MapView style={{ width, height }} region={props.region}>
-                {props.locations.map((location: Location, idx: number) => (
-                    <Marker
-                    key={idx}
-                    coordinate={location}
-                    image={TrackingDot}
-                    />
-                ))}
-                {polygons.map((polygon: LatLng[]) => (
+        <View>
+        <MapView
+            style={{ width, height }}
+            region={props.region}
+            onRegionChange={props.onRegionChange}
+            showsMyLocationButton={true}
+            zoomControlEnabled={true}
+            >
+                {props.locations.map((location: LatLng, idx: number) => (
                     <Polygon 
-                    coordinates={polygon}
+                    key={idx}
+                    coordinates={[
+                        {latitude: location.latitude, longitude: location.longitude},
+                        {latitude: location.latitude, longitude: location.longitude + 0.00005},
+                        {latitude: location.latitude + 0.00005, longitude: location.longitude + 0.00005},
+                        {latitude: location.latitude + 0.00005, longitude: location.longitude}
+                    ]}
                     fillColor={"rgba(128,128,255,0.5)"}
                     strokeColor={"rgba(128,255,128,0.5)"}
                     strokeWidth={5}
                     />
                 ))}
                 </MapView>
+                <TouchableOpacity
+                style={styles.zoomIn}
+                onPress={()=>{props.onPressZoomIn()}}
+                >
+                <Icon 
+                    name="md-add-circle"
+                    style={styles.icon}
+                    />
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.zoomOut}
+                onPress={()=>{props.onPressZoomOut()}}
+                >
+                <Icon 
+                    name="md-remove-circle" 
+                    style={styles.icon}
+                    />
+            </TouchableOpacity>
+            </View>
     );
 };
 
+const styles = StyleSheet.create({
+    zoomIn:     {
+        position: 'absolute',
+        width: 50,
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        right: 0,
+        bottom: 120,
+    },
+    zoomOut: {
+        position: 'absolute',
+        width: 50,
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        right: 0,
+        bottom: 80,
+    },
+    icon: {
+        fontSize: 36
+    }
+})
 export default MapComponent;
   
