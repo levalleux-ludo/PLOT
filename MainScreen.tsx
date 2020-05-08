@@ -40,7 +40,7 @@ state: MyState = {
     currentDay: today(),
     hasDayBefore: true,
     hasDayAfter: true,
-    showMap: false
+    showMap: true
   };
 
     constructor(props: any) {
@@ -93,7 +93,7 @@ state: MyState = {
 
     goToSettings() {
         const { navigation }: any = this.props;
-        navigation.navigate('Menu');
+        navigation.navigate('Services');
     }
 
     toggleTracking() {
@@ -141,7 +141,7 @@ state: MyState = {
 
     goToDayAfter() {
       const currentDay = dayAfter(this.state.currentDay);
-      console.log("goToDayBefore", currentDay.toDateString());
+      console.log("goToDayAfter", currentDay.toDateString());
       this.setState({currentDay});
       this.onChangeDay(currentDay);
     }

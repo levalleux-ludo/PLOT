@@ -16,7 +16,7 @@ import {
     Text
   } from 'native-base';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Fontisto } from '@expo/vector-icons';
   
 
 class MenuScreen extends Component {
@@ -52,49 +52,22 @@ class MenuScreen extends Component {
         }
         return (
             <Container>
-        <Header>
-          <Left>
-            <Button transparent onPress={() => this.goBack()}>
-              <Icon name="arrow-back" style={styles.iconStyle} />
-            </Button>
-          </Left>
-          <Body>
-            <Title>Menu</Title>
-          </Body>
-          <Right />
-        </Header>
         <Content>
           <List style={{ flex: 1, backgroundColor: '#fff' }}>
-            <ListItem icon onPress={() => this.navigate('Logs')}>
+            <ListItem icon onPress={() => this.navigate('Check')}>
               <Left>
-                <Icon name="ios-archive" style={styles.iconStyle} />
+                <Icon type="Feather" name="user-check" style={styles.iconStyle} />
               </Left>
               <Body>
-                <Text>Plugin Logs</Text>
+                <Text>Check Infection Status</Text>
               </Body>
             </ListItem>
-            <ListItem icon onPress={() => this.navigate('AllLocations')}>
+            <ListItem icon onPress={() => this.navigate('Publish')}>
               <Left>
-                <Icon name="ios-planet" style={styles.iconStyle} />
+                <Icon type="FontAwesome" name="cloud-upload" style={styles.iconStyle} />
               </Left>
               <Body>
-                <Text>All Locations</Text>
-              </Body>
-            </ListItem>
-            <ListItem icon onPress={() => this.navigate('PendingLocations')}>
-              <Left>
-                <Icon name="ios-planet" style={styles.iconStyle} />
-              </Left>
-              <Body>
-                <Text>Pending Locations</Text>
-              </Body>
-            </ListItem>
-            <ListItem icon onPress={() => this.navigate('Config')}>
-              <Left>
-                <Icon name="ios-settings" style={styles.iconStyle} />
-              </Left>
-              <Body>
-                <Text>Plugin Configuration</Text>
+                <Text>Publish Locations</Text>
               </Body>
             </ListItem>
             <ListItem icon>
@@ -122,7 +95,10 @@ class MenuScreen extends Component {
 
 const styles = StyleSheet.create({
     iconStyle: {
-      color: '#0A69FE'
+      color: '#0A69FE',
+      fontSize: 36,
+      width: 40,
+      padding: 0
     }
   });
   

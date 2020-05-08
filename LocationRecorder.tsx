@@ -6,8 +6,8 @@ export const fake = true;
 
 export function createFakeData() {
     const nbDays = 15;
-    const minLocationsPerDay = 120;
-    const maxLocationsPerDay = 500;
+    const minLocationsPerDay = 10;
+    const maxLocationsPerDay = 20;
     const minLatitude = +51.3;
     const maxLatitude = +51.34;
     const minLongitude = -0.01;
@@ -39,11 +39,11 @@ export function createFakeData() {
 
 export function getDayFromTime(time: number): Date {
     let date = new Date(time);
-    return new Date(
+    return new Date(Date.UTC(
         date.getUTCFullYear(),
         date.getUTCMonth(),
         date.getUTCDate()
-    );
+    ));
 }
 
 export function today(): Date {
@@ -65,6 +65,26 @@ export function dayAfter(aDay: Date) {
 function storageKeyForDay(time: Date) {
     return 'DAY_RECORD_' + time.toDateString();
 }
+
+export function addDays(aDay: Date, nbDaysToAdd: number): Date {
+    return getDayFromTime(aDay.valueOf() + nbDaysToAdd * A_DAY);
+  }
+
+export function daysBetween(day1: Date, day2: Date): Date[] {
+    const days = [];
+    const nbDays = 1 + Math.floor((day2.valueOf() - day1.valueOf()) / A_DAY);
+    if (nbDays >= 0) {
+      for (let i = 0; i < nbDays; i++) {
+        days.push(addDays(day1, i));
+      }
+    } else {
+      for (let i = 0; i > nbDays; i--) {
+        days.push(addDays(day1, i));
+      }
+    }
+    return days;
+  }
+  
 
 export default class LocationRecorder {
     lastRecordedDay = 0;

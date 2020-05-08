@@ -83,3 +83,8 @@ const styles = StyleSheet.create({
   
 
 export default TableComponent;
+// export default asyncComponent((props) => {
+//     return new Promise((resolve, reject) => {
+//         resolve(TableComponent(props));
+//     });
+// });

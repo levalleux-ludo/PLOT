@@ -1,4 +1,5 @@
 import React, {Component, ReactNode} from 'react';
+import { Spinner } from 'native-base';
 
 const asyncComponent = (importComponent: (props: any) => Promise<ReactNode>) => {
     return class extends Component {
@@ -14,8 +15,8 @@ const asyncComponent = (importComponent: (props: any) => Promise<ReactNode>) => 
         }
 
         render() {
-            const C = typeof this.state.component;
-            return C ? C : null;
+            const C = this.state.component;
+            return C ? C : <Spinner />;
         }
     }
 };
