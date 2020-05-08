@@ -9,8 +9,9 @@ function reduce(coord: number): number {
 }
 
 interface MyProps {
+    children: any[], // only to avoid compiler error
     locations: LatLng[],
-    region: Region,
+    region: Region | undefined,
     onRegionChange: (region: Region) => void,
     onPressZoomIn: () => void,
     onPressZoomOut: () => void
@@ -53,20 +54,21 @@ const MapComponent = (props: MyProps) => {
             showsMyLocationButton={true}
             zoomControlEnabled={true}
             >
-                {props.locations.map((location: LatLng, idx: number) => (
-                    <Polygon 
-                    key={idx}
-                    coordinates={[
-                        {latitude: location.latitude, longitude: location.longitude},
-                        {latitude: location.latitude, longitude: location.longitude + 0.00005},
-                        {latitude: location.latitude + 0.00005, longitude: location.longitude + 0.00005},
-                        {latitude: location.latitude + 0.00005, longitude: location.longitude}
-                    ]}
-                    fillColor={"rgba(128,128,255,0.5)"}
-                    strokeColor={"rgba(128,255,128,0.5)"}
-                    strokeWidth={5}
-                    />
-                ))}
+                {props.locations.map((location: LatLng, idx: number) => {
+                    // console.log("create polygon at", location);
+                    return (
+                        <Polygon 
+                        key={idx}
+                        coordinates={[
+                            {latitude: location.latitude, longitude: location.longitude},
+                            {latitude: location.latitude, longitude: location.longitude + 0.00005},
+                            {latitude: location.latitude + 0.00005, longitude: location.longitude + 0.00005},
+                            {latitude: location.latitude + 0.00005, longitude: location.longitude}
+                        ]}
+                        fillColor={"rgba(128,128,255,0.9)"}
+                        />
+                    );}
+                )}
                 </MapView>
                 <TouchableOpacity
                 style={styles.zoomIn}

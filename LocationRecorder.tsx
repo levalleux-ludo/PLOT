@@ -1,13 +1,65 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import { LocationArea } from "./LocationService";
+import { randomInt } from './Utils';
 
-function getDayFromTime(time: number): Date {
+export const fake = true;
+
+export function createFakeData() {
+    const nbDays = 15;
+    const minLocationsPerDay = 120;
+    const maxLocationsPerDay = 500;
+    const minLatitude = +51.3;
+    const maxLatitude = +51.34;
+    const minLongitude = -0.01;
+    const maxLongitude = +0.01;
+    const accuracyFactor = 10000;
+    let date = today();
+    const recorder = new LocationRecorder();
+    for (let dayIdx = 0; dayIdx < nbDays; dayIdx++) {
+        const locations = [];
+        const nbLocations = randomInt(minLocationsPerDay, maxLocationsPerDay);
+        for (let i = 0; i < nbLocations; i++) {
+            const lati = randomInt(minLatitude * accuracyFactor, maxLatitude * accuracyFactor) / accuracyFactor;
+            const longi = randomInt(minLongitude * accuracyFactor, maxLongitude * accuracyFactor) / accuracyFactor;
+            const time = new Date(
+                date.getUTCFullYear(),
+                date.getUTCMonth(),
+                date.getUTCDate(),
+                randomInt(0, 12),
+                6*randomInt(0, 10)
+            )
+            const area = new LocationArea(time.valueOf(), lati, longi);
+            // console.log("generate random area:", area);
+            locations.push(area);
+        }
+        recorder.storeLocations(date, locations);
+        date = dayBefore(date);
+    }
+}
+
+export function getDayFromTime(time: number): Date {
     let date = new Date(time);
     return new Date(
         date.getUTCFullYear(),
         date.getUTCMonth(),
         date.getUTCDate()
     );
+}
+
+export function today(): Date {
+    return getDayFromTime(Date.now())
+}
+
+const A_SECOND = 1000;
+const AN_HOUR = 3600 * A_SECOND;
+const A_DAY = 24 * AN_HOUR;
+
+export function dayBefore(aDay: Date) {
+    return getDayFromTime(aDay.valueOf() - A_DAY);
+}
+
+export function dayAfter(aDay: Date) {
+    return getDayFromTime(aDay.valueOf() + A_DAY);
 }
 
 function storageKeyForDay(time: Date) {
@@ -30,13 +82,25 @@ export default class LocationRecorder {
         }
         return false;
     }
+    async recordExists(day: Date): Promise<boolean> {
+        const key = storageKeyForDay(day);
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if(value !== null) {
+                return true;
+            }
+        } catch(e) {
+            return false;
+        }
+        return false;
+    }
     async getLocations(day: Date): Promise<LocationArea[]> {
         let locations: LocationArea[] = [];
         const key = storageKeyForDay(day);
         try {
             const data = await AsyncStorage.getItem(key);
             if(data !== null) {
-                locations = JSON.parse(data);
+                locations = JSON.parse(data).map((l: any) => new LocationArea(l.time, l.lati, l.longi));
             }
         } catch(e) {
             console.error(e);

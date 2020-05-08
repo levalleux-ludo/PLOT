@@ -154,7 +154,7 @@ export default class LocationService {
             console.log('[INFO] BackgroundGeolocation services enabled', status.locationServicesEnabled);
             console.log('[INFO] BackgroundGeolocation auth status: ' + status.authorization);
             if (!status.isRunning) {
-              BackgroundGeolocation.start(); //triggers start on start event
+            //   BackgroundGeolocation.start(); //triggers start on start event
             }
         });
     

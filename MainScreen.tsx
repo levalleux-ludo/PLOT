@@ -1,33 +1,57 @@
 import React, { Component } from 'react';
-import { Container, Content, Footer, FooterTab, Button, Icon } from 'native-base';
-import { StyleSheet, Dimensions, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location } from '@mauron85/react-native-background-geolocation';
+import { Container, Content, Footer, FooterTab, Button, Icon, Left, Body, Header, Right, Title } from 'native-base';
+import { StyleSheet, Dimensions, Alert, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation, NavigationContainer } from '@react-navigation/native';
+import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location, LocationError } from '@mauron85/react-native-background-geolocation';
 import MapComponent from './MapComponent';
 import { Region, LatLng } from 'react-native-maps';
 import LocationService, { LocationArea } from './LocationService';
+import LocationRecorder, { today, dayBefore, dayAfter } from './LocationRecorder';
+import { createStackNavigator } from '@react-navigation/stack';
+import TableComponent from './TableComponent';
 
 const defaultLatitudeDelta = 0.015;
 const defaultLongitudeDelta = 0.0121;
-class MainScreen extends Component {
 
-  state: {
+interface MyState {
     region: Region | undefined,
     zoomFactor: number,
-    locations: LatLng[],
+    locations: LocationArea[],
+    hiddenLocations: Map<string, boolean>,
     stationaries: StationaryLocation[],
-    isRunning: boolean
-  } = {
+    isRunning: boolean,
+    currentDay: Date,
+    hasDayBefore: boolean,
+    hasDayAfter: boolean,
+    showMap: boolean
+}
+
+const Stack = createStackNavigator();
+
+class MainScreen extends Component {
+
+state: MyState = {
     region: undefined,
     zoomFactor: 1,
     locations: [],
+    hiddenLocations: new Map(),
     stationaries: [],
-    isRunning: false
+    isRunning: false,
+    currentDay: today(),
+    hasDayBefore: true,
+    hasDayAfter: true,
+    showMap: false
   };
 
     constructor(props: any) {
         super(props);
         this.goToSettings = this.goToSettings.bind(this);
+        this.goToDayAfter = this.goToDayAfter.bind(this);
+        this.goToDayBefore = this.goToDayBefore.bind(this);
+        this.switchToMapView = this.switchToMapView.bind(this);
+        this.switchToTableView = this.switchToTableView.bind(this);
+        this.getValueAtCol = this.getValueAtCol.bind(this);
+        this.getRowStyle = this.getRowStyle.bind(this);
     }
 
     componentDidMount() {
@@ -41,6 +65,7 @@ class MainScreen extends Component {
       if (LocationService.lastLocation) {
         this.refreshRegion(LocationService.lastLocation.toLatLng());
       }
+      this.onChangeDay(this.state.currentDay);
     }
 
     refreshRegion(location?: LatLng) {
@@ -57,10 +82,8 @@ class MainScreen extends Component {
             latitudeDelta: defaultLatitudeDelta*this.state.zoomFactor,
             longitudeDelta: defaultLongitudeDelta*this.state.zoomFactor
         });
-        let locations = this.state.locations;
-        locations.push(newLocation);
         console.log('[INFO] Set region:' + region);
-        this.setState({ locations, region });
+        this.setState({ region });
       }
   }
 
@@ -96,27 +119,137 @@ class MainScreen extends Component {
       this.setState({ zoomFactor });
       this.refreshRegion();
     }
-        
+
+    onChangeDay(currentDay: Date) {
+      const recorder = new LocationRecorder();
+      const hasDayAfter = recorder.recordExists(dayAfter(currentDay));
+      const hasDayBefore = recorder.recordExists(dayBefore(currentDay));
+      recorder.getLocations(currentDay).then(locations => {
+        if (locations && (locations.length > 0)) {
+          this.refreshRegion(locations[0].toLatLng());
+          this.setState({hasDayAfter, hasDayBefore, locations});
+        }
+      }).catch(error => console.error(error));
+    }
+
+    goToDayBefore() {
+      const currentDay = dayBefore(this.state.currentDay);
+      console.log("goToDayBefore", currentDay.toDateString());
+      this.setState({currentDay});
+      this.onChangeDay(currentDay);
+    }
+
+    goToDayAfter() {
+      const currentDay = dayAfter(this.state.currentDay);
+      console.log("goToDayBefore", currentDay.toDateString());
+      this.setState({currentDay});
+      this.onChangeDay(currentDay);
+    }
+
+    switchToTableView() {
+      this.setState({showMap: false});
+    }
+
+    switchToMapView() {
+      this.setState({showMap: true});
+    }
+
+    hideLocation(location: LatLng, isHidden: boolean) {
+      const hiddenLocations = this.state.hiddenLocations;
+      const locationKey = JSON.stringify(location);
+      if (!isHidden && hiddenLocations.has(locationKey)) {
+        hiddenLocations.delete(locationKey);
+      } else {
+        hiddenLocations.set(locationKey, isHidden);
+      }
+      this.setState({hiddenLocations});
+    }
+
+    getValueAtCol(area: LocationArea, colIndex: number) {
+      const location = area.toLatLng();
+      const locationKey = JSON.stringify(location);
+      const isHidden = this.state.hiddenLocations.has(locationKey) ? this.state.hiddenLocations.get(locationKey) : false;
+      const value = [
+        // (la: LocationArea) => la.getDay().toDateString(),
+        (la: LocationArea) => new Date(la.time).toISOString(),
+        (la: LocationArea) => la.lati,
+        (la: LocationArea) => la.longi,
+        (la: LocationArea) => (
+          <TouchableOpacity onPress={() => {
+            const message = (isHidden) ? 
+              `Location ${location} is now being revealed` :
+              `Location ${location} is now hidden`;
+            Alert.alert(message);
+            this.hideLocation(location, !isHidden);
+          }}>
+            <View style={styles.filter}>
+              <Icon type="AntDesign" name={isHidden ? "lock" : "unlock"} style={styles.iconBlack}/>
+            </View>
+          </TouchableOpacity>
+        )
+      ];
+      return value[colIndex](area);
+    }
+
+    getRowStyle(area: LocationArea) {
+      const location = area.toLatLng();
+      const locationKey = JSON.stringify(location);
+      const isHidden = this.state.hiddenLocations.has(locationKey) ? this.state.hiddenLocations.get(locationKey) : false;
+      return (isHidden) ? styles.hiddenCell : styles.cell;
+    }
+
     render() {
-        const { locations, stationaries, region, isRunning }: any = this.state;
+        const { locations, stationaries, region, isRunning, currentDay, hasDayBefore, hasDayAfter }: MyState = this.state;
         return (
             <Container>
-                <Content>
+                <Content scrollEnabled={false}  padder={false}>
+                { this.state.showMap ? 
+                  <View>
                   <MapComponent
                    region={region}
-                   locations={locations}
+                   locations={locations.map(l => l.toLatLng())}
                    onRegionChange={this.onRegionChange}
                    onPressZoomIn={this.onPressZoomIn}
                    onPressZoomOut={this.onPressZoomOut}
                    >
-                   </MapComponent>
+                  </MapComponent>
+                  <TouchableOpacity style={styles.switchToTable} onPress={this.switchToTableView}>
+                    <Icon name="md-list" style={styles.iconSwitchToTable}/>
+                  </TouchableOpacity>
+                  </View>
+                :
+                <Container>
+                <Header transparent style={{margin:0, padding: 0}}>
+                <Body><Title>Header No Shadow</Title></Body>
+                <Right>
+                <TouchableOpacity style={styles.switchToMap} onPress={this.switchToMapView}>
+                  <Icon name="md-map" style={styles.iconSwitchToTable}/>
+                </TouchableOpacity>
+                </Right>
+                </Header>
+                <Content padder={false}>
+                  <TableComponent
+                  locationAreas={locations.sort((l1, l2) => l1.time - l2.time)}
+                  tableHead={['Time', 'Latitude', 'Longitude', 'Filter']}
+                  colWidth={[190,68,68,48]}
+                  getValueAtCol={this.getValueAtCol}
+                  getRowStyle={this.getRowStyle}
+                  >
+                </TableComponent>
+                </Content>
+               </Container>
+              }
                 </Content>
                 <Footer style={styles.footer}>
                 <FooterTab>
-                    <Button onPress={this.toggleTracking}>
-                    <Icon name={isRunning ? 'pause' : 'play'} style={styles.icon} />
+                  <Button onPress={this.goToDayBefore} disabled={false}>
+                  <Icon name={'ios-arrow-back'} style={styles.icon} />
+                  </Button>
+                  <Text style={styles.date}>{currentDay.toDateString()}</Text>
+                  <Button onPress={this.goToDayAfter} disabled={false}>
+                    <Icon name={'ios-arrow-forward'} style={styles.icon} />
                     </Button>
-                    <Button onPress={this.goToSettings}>
+                  <Button onPress={this.goToSettings}>
                     <Icon name="menu" style={styles.icon} />
                     </Button>
                 </FooterTab>
@@ -136,6 +269,54 @@ const styles = StyleSheet.create({
     icon: {
       color: '#fff',
       fontSize: 30
+    },
+    date: {
+      color: '#fff',
+      fontSize: 20,
+      alignItems: 'center',
+      fontWeight: 'bold',
+      alignSelf: 'center',
+      marginStart: 12,
+      marginEnd: 12
+    },
+    switchToTable: {
+      position: "absolute",
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+      right: 10,
+      top: 10,
+      zIndex: 99,
+    },
+    switchToMap: {
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 99,
+    },
+    iconSwitchToTable: {
+      fontSize: 40,
+    },
+    btn: {
+      width: 58,
+      height: 18,
+      backgroundColor: '#78B7BB',
+      borderRadius: 2
+    },
+    filter: {
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    iconBlack: {
+      color: '#000',
+      fontSize: 30
+    },
+    hiddenCell: {
+      backgroundColor: '#FF0000',
+    },
+    cell: {
     }
   });
   
