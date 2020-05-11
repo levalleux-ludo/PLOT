@@ -42,6 +42,9 @@ class GIRService {
     index: number
   ): GlobalInfectionRecord | undefined {
     const girs = this.getRecords(day);
+    console.log(
+      `Sending record #${index + 1} for day=${new Date(day).toDateString()}`
+    );
     if (girs && girs.length > index) {
       return girs[index];
     }
@@ -57,17 +60,10 @@ class GIRService {
   public mergeIntoRecord(day: number, data: number[]) {
     const date = new Date(day);
     console.log(
-      `merge into record day=${new Date(day).toDateString()} minDay=${new Date(
-        this.minDay
-      ).toDateString()} maxDay=${new Date(this.maxDay).toDateString()}`
+      `Received new record for day=${new Date(day).toDateString()}`
     );
     this.minDay = this.minDay === 0 ? day : Math.min(this.minDay, day);
     this.maxDay = this.maxDay === 0 ? day : Math.max(this.maxDay, day);
-    console.log(
-      `after: minDay=${new Date(this.minDay).toDateString()} maxDay=${new Date(
-        this.maxDay
-      ).toDateString()}`
-    );
     let girs = this.getRecords(day);
     if (!girs) {
       girs = [];
