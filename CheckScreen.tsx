@@ -8,6 +8,8 @@ import { BloomFilterService } from './BloomFilterService';
 import { Table, TableWrapper, Row } from 'react-native-table-component';
 import { BloomFilter } from 'bloomfilter';
 import Spinner from 'react-native-spinkit';
+import { CheckPublishAbstract } from './CheckPublishAbstract';
+import fetchService from './FetchService';
 
 interface DataItem {
   day: Date;
@@ -26,7 +28,7 @@ interface MyState {
     loading: boolean[]
   }
 
-class CheckScreen extends Component {
+class CheckScreen extends CheckPublishAbstract {
     state: MyState = {
         dataArray: [],
         loaded: [],
@@ -41,88 +43,46 @@ class CheckScreen extends Component {
       return this.state;
     }
 
-    async generateBloomFilter(data: DataItem): Promise<BloomFilter>{
-      return new Promise((resolve, reject) => {
-        try {
-          setTimeout(() => {
-            const bloomFilter = new BloomFilter(0,0)
-            resolve(bloomFilter);
-          }, 2000);
-        } catch (e) {reject(e)};
-      });
-    }
-
-    async getGlobalRecord(day: Date): Promise<BloomFilter>{
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          resolve(new BloomFilter(0,0));
-        }, 2000);
-      });
-    }
-
-    async compare(day: Date, bloomFilter: BloomFilter, globalRecord: BloomFilter): Promise<number> {
+    async getGlobalRecord(day: Date): Promise<BloomFilter> {
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              resolve(12);
-            }, 2000);
+            fetchService.getGIRInfos().then(infos => {
+                const nbHashes = infos.bloomFilter.nbHashes;
+                fetchService.getGIR(day).then(gir => {
+                    const bloomFilter = BloomFilterService.fromBuckets(gir, nbHashes);
+                    setTimeout(() => resolve(bloomFilter), 1);
+                }).catch(e => {
+                    console.error(e);
+                    reject(e);
+                });
+            }).catch(e => {
+                console.error(e);
+                reject(e);
+            });
         });
     }
 
-    loadRecord(
-        dayStart: Date,
-        nbDaysBackwards: number,
-        callback: (data: DataItem, index: number, next: () => void) => void
-    ) {
+    async compare(day: Date, globalRecord: BloomFilter): Promise<number> {
         const recorder = new LocationRecorder();
-        const dayEnd = addDays(dayStart, -nbDaysBackwards);
-        this.recursiveLoadRecord(
-            recorder,
-            dayStart,
-            dayEnd,
-            -1,
-            0,
-            callback
-        );
-    }
-
-    recursiveLoadRecord(
-        recorder: LocationRecorder,
-        dayStart: Date,
-        dayEnd: Date,
-        dayIncrement: number,
-        index: number,
-        callback: (data: DataItem, index: number, next: () => void) => void) {
-        const onLocations = (day: Date, locations: LocationArea[], index: number) => {
-            console.log(`Get ${locations.length} locations for day ${day.toDateString()}`);
-            callback({
-                day: day,
-                selected: false,
-                completed: false,
-                computing: false,
-                downloading: false,
-                comparing: false,
-                error: false,
-                status: '',
-                nbContacts: 0
-            }, index, () => {
-              if (day.getUTCDate() !== dayEnd.getUTCDate()) {
-                index++;
-                this.recursiveLoadRecord(recorder, dayStart, dayEnd, dayIncrement, index, callback);
-              } else {
-                  console.log(`loadRecord finished for day ${day.toDateString()}, index=${index}`);
-              }
-            });
-        }
-        const day = addDays(dayStart, index * dayIncrement);
-        recorder.recordExists(day).then(exists => {
-          if (exists) {
-            recorder.getLocations(day).then(locations => {
-                onLocations(day, locations, index);
-            }).catch(e => console.error(e));
-          } else {
-            onLocations(day, [], index);
+        return new Promise((resolve, reject) => {
+          recorder.recordExists(day).then(exists => {
+            if (exists) {
+                recorder.getLocations(day).then(locations => {
+                    resolve(BloomFilterService.compare(locations, globalRecord));
+                //   setTimeout(() => resolve(bloomFilter), 1);
+                }).catch(e => {
+                  console.error(e);
+                  reject(e);
+                });
+            } else {
+              const e = `No location record found for day ${day.toDateString()}`;
+              console.error(e);
+              reject(e);
             }
-        }).catch(e => console.error(e));
+          }).catch(e => {
+            console.error(e);
+            reject(e);
+          });
+        });
     }
 
     componentDidMount() {
@@ -157,7 +117,7 @@ class CheckScreen extends Component {
               data.selected = true;
               this.setState({dataArray, loaded, loading});
               const day = data.day;
-              this.generateBloomFilter(data).then((bloomFilter) => {
+            //   this.generateBloomFilter(day).then((bloomFilter) => {
                 data.error = false;
                 data.completed = false;
                 data.computing = false;
@@ -170,7 +130,7 @@ class CheckScreen extends Component {
                     data.comparing = true;
                     data.status = 'comparing...';
                     this.setState(dataArray);
-                    this.compare(day, bloomFilter, globalRecord).then((nbContacts) => {
+                    this.compare(day, globalRecord).then((nbContacts) => {
                         data.nbContacts = nbContacts;
                         onCompleted(dataArray, 'nb contacts:');
                     }).catch(e => {
@@ -179,11 +139,17 @@ class CheckScreen extends Component {
                 }).catch(e => {
                   onCompleted(dataArray, '', e);
                 });
-              }).catch(e => {
-                onCompleted(dataArray, '', e);
-              });
+            //   }).catch(e => {
+            //     onCompleted(dataArray, '', e);
+            //   });
           }
       );
+    }
+
+    
+    goBack() {
+        const { navigation }: any = this.props;
+        navigation.goBack();
     }
   
     render() {

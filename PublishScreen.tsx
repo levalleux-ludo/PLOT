@@ -8,6 +8,8 @@ import { BloomFilterService } from './BloomFilterService';
 import { Table, TableWrapper, Row } from 'react-native-table-component';
 import { BloomFilter } from 'bloomfilter';
 import Spinner from 'react-native-spinkit';
+import fetchService from './FetchService';
+import { CheckPublishAbstract } from './CheckPublishAbstract';
 
 interface DataItem {
   day: Date;
@@ -24,7 +26,7 @@ interface MyState {
     loading: boolean[]
   }
 
-class PublishScreen extends Component {
+class PublishScreen extends CheckPublishAbstract {
     state: MyState = {
         dataArray: [],
         loaded: [],
@@ -39,79 +41,72 @@ class PublishScreen extends Component {
       return this.state;
     }
 
-    async generateBloomFilter(data: DataItem): Promise<BloomFilter>{
-      return new Promise((resolve, reject) => {
-        try {
-          setTimeout(() => {
-            const bloomFilter = new BloomFilter(0,0)
-            resolve(bloomFilter);
-          }, 2000);
-        } catch (e) {reject(e)};
-      });
-    }
-
     async publish(day: Date, bloomFilter: BloomFilter): Promise<void>{
       return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          resolve();
-        }, 2000);
+        fetchService.publishRecord(day, bloomFilter).then(() => {
+          setTimeout(() => resolve(), 1);
+          // resolve();
+        }).catch(e => {
+          console.error(e);
+          reject(e);
+        });
       });
     }
 
-    loadRecord(
-        dayStart: Date,
-        nbDaysBackwards: number,
-        callback: (data: DataItem, index: number, next: () => void) => void
-    ) {
-        const recorder = new LocationRecorder();
-        const dayEnd = addDays(dayStart, -nbDaysBackwards);
-        this.recursiveLoadRecord(
-            recorder,
-            dayStart,
-            dayEnd,
-            -1,
-            0,
-            callback
-        );
-    }
+    // loadRecord(
+    //     dayStart: Date,
+    //     nbDaysBackwards: number,
+    //     callback: (data: DataItem, index: number, next: () => void) => void
+    // ) {
+    //     const recorder = new LocationRecorder();
+    //     const dayEnd = addDays(dayStart, -nbDaysBackwards);
+    //     this.recursiveLoadRecord(
+    //         recorder,
+    //         dayStart,
+    //         dayEnd,
+    //         -1,
+    //         0,
+    //         callback
+    //     );
+    // }
 
-    recursiveLoadRecord(
-        recorder: LocationRecorder,
-        dayStart: Date,
-        dayEnd: Date,
-        dayIncrement: number,
-        index: number,
-        callback: (data: DataItem, index: number, next: () => void) => void) {
-        const onLocations = (day: Date, locations: LocationArea[], index: number) => {
-            console.log(`Get ${locations.length} locations for day ${day.toDateString()}`);
-            callback({
-                day: day,
-                selected: false,
-                completed: false,
-                computing: false,
-                publishing: false,
-                error: false,
-                status: ''
-            }, index, () => {
-              if (day.getUTCDate() !== dayEnd.getUTCDate()) {
-                index++;
-                this.recursiveLoadRecord(recorder, dayStart, dayEnd, dayIncrement, index, callback);
-              } else {
-                  console.log(`loadRecord finished for day ${day.toDateString()}, index=${index}`);
-              }
-            });
-        }
-        const day = addDays(dayStart, index * dayIncrement);
-        recorder.recordExists(day).then(exists => {
-          if (exists) {
-            recorder.getLocations(day).then(locations => {
-                onLocations(day, locations, index);
-            }).catch(e => console.error(e));
-          } else {
-            onLocations(day, [], index);
-            }
-        }).catch(e => console.error(e));
-    }
+    // recursiveLoadRecord(
+    //     recorder: LocationRecorder,
+    //     dayStart: Date,
+    //     dayEnd: Date,
+    //     dayIncrement: number,
+    //     index: number,
+    //     callback: (data: DataItem, index: number, next: () => void) => void) {
+    //     const onLocations = (day: Date, locations: LocationArea[], index: number) => {
+    //         console.log(`Get ${locations.length} locations for day ${day.toDateString()}`);
+    //         callback({
+    //             day: day,
+    //             selected: false,
+    //             completed: false,
+    //             computing: false,
+    //             publishing: false,
+    //             error: false,
+    //             status: ''
+    //         }, index, () => {
+    //           if (day.getUTCDate() !== dayEnd.getUTCDate()) {
+    //             index++;
+    //             this.recursiveLoadRecord(recorder, dayStart, dayEnd, dayIncrement, index, callback);
+    //           } else {
+    //               console.log(`loadRecord finished for day ${day.toDateString()}, index=${index}`);
+    //           }
+    //         });
+    //     }
+    //     const day = addDays(dayStart, index * dayIncrement);
+    //     recorder.recordExists(day).then(exists => {
+    //       if (exists) {
+    //         recorder.getLocations(day).then(locations => {
+    //             onLocations(day, locations, index);
+    //         }).catch(e => console.error(e));
+    //       } else {
+    //         onLocations(day, [], index);
+    //         }
+    //     }).catch(e => console.error(e));
+    // }
 
     componentDidMount() {
         const dayStart = today();
@@ -144,7 +139,7 @@ class PublishScreen extends Component {
               data.selected = true;
               this.setState({dataArray, loaded, loading});
               const day = data.day;
-              this.generateBloomFilter(data).then((bloomFilter) => {
+              this.generateBloomFilter(day).then((bloomFilter) => {
                 data.error = false;
                 data.completed = false;
                 data.computing = false;

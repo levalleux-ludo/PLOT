@@ -7,6 +7,11 @@ import LocationRecorder, { today, dayBefore, addDays } from './LocationRecorder'
 import { BloomFilterService } from './BloomFilterService';
 import { Table, TableWrapper, Row } from 'react-native-table-component';
 
+const BLOOM_FILTERS_PARAMS = {
+  sizeInBits: 32*128,
+  nbHashes: 12
+};
+
 interface ItemContent {
   index: number,
   loaded: boolean,
@@ -106,7 +111,8 @@ class BloomFilterScreen extends Component {
                     loading: false,
                     locations: data.locations,
                     tableData: [],
-                    colWidth: []
+                    colWidth: [],
+                    view: (<View></View>)
                   }
               };
               loaded[index] = false;
@@ -142,7 +148,7 @@ class BloomFilterScreen extends Component {
         const nbColumns = 64;
         const colWidth: number[] = [];
         if (locations && locations.length) {
-          const bloomFilter = BloomFilterService.createBloomFilter(locations);
+          const bloomFilter = BloomFilterService.createBloomFilter(locations, BLOOM_FILTERS_PARAMS.sizeInBits, BLOOM_FILTERS_PARAMS.nbHashes);
           let rowData: any[] = [];
           bloomFilter.buckets.forEach((value: number, index: number) => {
             for (let bit = 0; bit < 32; bit++) {
