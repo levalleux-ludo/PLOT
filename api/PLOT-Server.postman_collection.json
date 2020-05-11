@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "de803fb8-62f9-483c-b317-5fd073150162",
+		"name": "PLOT-Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET infos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host_url}}/gir",
+					"host": [
+						"{{host_url}}"
+					],
+					"path": [
+						"gir"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "966ca898-5509-4421-b255-ba6af51b7d88",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "431f8b14-9911-4754-ac42-d9d37a46dac1",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "c58beace-c4fd-4613-bd68-eee3618904d9",
+			"key": "host_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
