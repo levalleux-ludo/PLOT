@@ -1,6 +1,6 @@
 import React, { PureComponent, Component } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import {
     Container,
     Header,
@@ -17,6 +17,7 @@ import {
   } from 'native-base';
 import * as Font from 'expo-font';
 import { Ionicons, Fontisto } from '@expo/vector-icons';
+import { createFakeData } from './LocationRecorder';
   
 
 class MenuScreen extends Component {
@@ -42,6 +43,11 @@ class MenuScreen extends Component {
     goBack() {
         const { navigation }: any = this.props;
         navigation.goBack();
+    }
+
+    renewIdentity() {
+      createFakeData();
+      Alert.alert('New Identity !', 'New location record history has been generated.');
     }
     
     render() {
@@ -84,6 +90,14 @@ class MenuScreen extends Component {
               </Left>
               <Body>
                 <Text>Show Location Settings</Text>
+              </Body>
+            </ListItem>
+            <ListItem icon onPress={() => this.renewIdentity()}>
+              <Left>
+                <Icon type="MaterialIcons" name="autorenew" style={styles.iconStyle} />
+              </Left>
+              <Body>
+                <Text>Renew Identity</Text>
               </Body>
             </ListItem>
           </List>

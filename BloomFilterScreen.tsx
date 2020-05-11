@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
 import { Text, View, Accordion, Icon, Item, Spinner } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
-import { LocationArea } from './LocationService';
+import { LocationArea } from './LocationArea';
 import LocationRecorder, { today, dayBefore, addDays } from './LocationRecorder';
 import { BloomFilterService } from './BloomFilterService';
 import { Table, TableWrapper, Row } from 'react-native-table-component';

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Spinner } from 'native-base';
 import { Text, ScrollView, StyleSheet } from 'react-native';
 import { Table, TableWrapper, Row } from 'react-native-table-component';
-import { LocationArea } from './LocationService';
+import { LocationArea } from './LocationArea';
 import asyncComponent from './asyncComponent';
 
 

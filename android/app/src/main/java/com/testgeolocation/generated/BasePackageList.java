@@ -1,4 +1,4 @@
-package com.testgeolocation.generated;
+package com.plot_app.generated;
 
 import java.util.Arrays;
 import java.util.List;

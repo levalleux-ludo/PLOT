@@ -1,4 +1,4 @@
-package com.testgeolocation;
+package com.plot_app;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

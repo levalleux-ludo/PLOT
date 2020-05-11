@@ -5,14 +5,15 @@ import { useNavigation, NavigationContainer } from '@react-navigation/native';
 import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location, LocationError } from '@mauron85/react-native-background-geolocation';
 import MapComponent from './MapComponent';
 import { Region, LatLng, MapEvent } from 'react-native-maps';
-import LocationService, { LocationArea } from './LocationService';
+import LocationService from './LocationService';
+import { LocationArea } from './LocationArea';
 import LocationRecorder, { today, dayBefore, dayAfter } from './LocationRecorder';
 import { createStackNavigator } from '@react-navigation/stack';
 import TableComponent from './TableComponent';
 import { MenuProvider, Menu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu';
 
-const defaultLatitudeDelta = 0.005;
-const defaultLongitudeDelta = 0.002;
+const defaultLatitudeDelta = 0.002;
+const defaultLongitudeDelta = 0.001;
 
 interface MyState {
     region: Region | undefined,
@@ -143,6 +144,7 @@ state: MyState = {
           x: e.nativeEvent.position.x / PixelRatio.get(),
           y: e.nativeEvent.position.y / PixelRatio.get()
         };
+        this.setState({menuPosition});
         const menuLocationIdx = idx;
         let menuOption = 1;
         if (this.isLocationHidden(idx))
@@ -237,13 +239,13 @@ state: MyState = {
       const value = [
         // (la: LocationArea) => la.getDay().toDateString(),
         (la: LocationArea) => new Date(la.time).toISOString(),
-        (la: LocationArea) => la.lati,
-        (la: LocationArea) => la.longi,
+        (la: LocationArea) => la.lati.toFixed(4),
+        (la: LocationArea) => la.longi.toFixed(4),
         (la: LocationArea) => (
           <TouchableOpacity onPress={() => {
             const message = (isHidden) ? 
-              `Location ${location} is now being revealed` :
-              `Location ${location} is now hidden`;
+              `Location (${la.lati.toFixed(4)}, ${la.longi.toFixed(4)}) is now being revealed` :
+              `Location (${la.lati.toFixed(4)}, ${la.longi.toFixed(4)}) is now hidden`;
             Alert.alert(message);
             this.hideLocation(location, !isHidden);
           }}>
@@ -281,8 +283,8 @@ state: MyState = {
                    closeMenu={this.closeMenu}
                    onClickMenuOption={this.onClickMenuOption}
                    isLocationHidden={this.isLocationHidden}
-                   showMenu={showMenu}
                    menuPosition={menuPosition}
+                   showMenu={showMenu}
                    menuOption={menuOption}
                    >
                   </MapComponent>

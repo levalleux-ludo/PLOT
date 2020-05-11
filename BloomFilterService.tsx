@@ -1,4 +1,4 @@
-import { LocationArea } from "./LocationService";
+import { LocationArea } from './LocationArea';
 import { BloomFilter } from 'bloomfilter';
 
 export class BloomFilterService {

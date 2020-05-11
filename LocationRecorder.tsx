@@ -1,13 +1,13 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import { LocationArea } from "./LocationService";
+import { LocationArea } from "./LocationArea";
 import { randomInt } from './Utils';
 
 export const fake = true;
 
 export function createFakeData() {
-    const nbDays = 5;
-    const minLocationsPerDay = 20;
-    const maxLocationsPerDay = 40;
+    const nbDays = 16;
+    const minLocationsPerDay = 50;
+    const maxLocationsPerDay = 100;
     const minLatitude = +51.148;
     const maxLatitude = +51.152;
     const minLongitude = 0.868;

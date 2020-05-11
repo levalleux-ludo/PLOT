@@ -3,7 +3,7 @@ import { BloomFilter } from "bloomfilter";
 import LocationRecorder, { addDays } from "./LocationRecorder";
 import fetchService from "./FetchService";
 import { BloomFilterService } from "./BloomFilterService";
-import { LocationArea } from "./LocationService";
+import { LocationArea } from './LocationArea';
 
 export abstract class CheckPublishAbstract extends Component {
 
@@ -19,7 +19,7 @@ export abstract class CheckPublishAbstract extends Component {
                     infos.bloomFilter.sizeInBits,
                     infos.bloomFilter.nbHashes
                   );
-                  setTimeout(() => resolve(bloomFilter), 1);
+                  setTimeout(() => resolve(bloomFilter), 0);
                   // resolve(bloomFilter);
                 }).catch(e => {
                   console.error(e);
@@ -44,7 +44,8 @@ export abstract class CheckPublishAbstract extends Component {
       loadRecord(
         dayStart: Date,
         nbDaysBackwards: number,
-        callback: (data: any, index: number, next: () => void) => void
+        callback: (data: any, index: number, next: () => void) => void,
+        next: () => void
     ) {
         const recorder = new LocationRecorder();
         const dayEnd = addDays(dayStart, -nbDaysBackwards);
@@ -54,7 +55,8 @@ export abstract class CheckPublishAbstract extends Component {
             dayEnd,
             -1,
             0,
-            callback
+            callback,
+            next
         );
     }
 
@@ -64,7 +66,9 @@ export abstract class CheckPublishAbstract extends Component {
         dayEnd: Date,
         dayIncrement: number,
         index: number,
-        callback: (data: any, index: number, next: () => void) => void) {
+        callback: (data: any, index: number, next: () => void) => void,
+        next: () => void
+        ) {
         const onLocations = (day: Date, locations: LocationArea[], index: number) => {
             console.log(`Get ${locations.length} locations for day ${day.toDateString()}`);
             callback({
@@ -80,9 +84,10 @@ export abstract class CheckPublishAbstract extends Component {
             }, index, () => {
               if (day.getUTCDate() !== dayEnd.getUTCDate()) {
                 index++;
-                this.recursiveLoadRecord(recorder, dayStart, dayEnd, dayIncrement, index, callback);
+                this.recursiveLoadRecord(recorder, dayStart, dayEnd, dayIncrement, index, callback, next);
               } else {
                   console.log(`loadRecord finished for day ${day.toDateString()}, index=${index}`);
+                  next();
               }
             });
         }

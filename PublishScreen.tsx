@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Alert } from 'react-native';
 import { Text, View, Accordion, Icon, List, ListItem, Left, Right, Body } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { LocationArea } from './LocationService';
@@ -44,7 +44,7 @@ class PublishScreen extends CheckPublishAbstract {
     async publish(day: Date, bloomFilter: BloomFilter): Promise<void>{
       return new Promise((resolve, reject) => {
         fetchService.publishRecord(day, bloomFilter).then(() => {
-          setTimeout(() => resolve(), 1);
+          setTimeout(() => resolve(), 0);
           // resolve();
         }).catch(e => {
           console.error(e);
@@ -52,61 +52,6 @@ class PublishScreen extends CheckPublishAbstract {
         });
       });
     }
-
-    // loadRecord(
-    //     dayStart: Date,
-    //     nbDaysBackwards: number,
-    //     callback: (data: DataItem, index: number, next: () => void) => void
-    // ) {
-    //     const recorder = new LocationRecorder();
-    //     const dayEnd = addDays(dayStart, -nbDaysBackwards);
-    //     this.recursiveLoadRecord(
-    //         recorder,
-    //         dayStart,
-    //         dayEnd,
-    //         -1,
-    //         0,
-    //         callback
-    //     );
-    // }
-
-    // recursiveLoadRecord(
-    //     recorder: LocationRecorder,
-    //     dayStart: Date,
-    //     dayEnd: Date,
-    //     dayIncrement: number,
-    //     index: number,
-    //     callback: (data: DataItem, index: number, next: () => void) => void) {
-    //     const onLocations = (day: Date, locations: LocationArea[], index: number) => {
-    //         console.log(`Get ${locations.length} locations for day ${day.toDateString()}`);
-    //         callback({
-    //             day: day,
-    //             selected: false,
-    //             completed: false,
-    //             computing: false,
-    //             publishing: false,
-    //             error: false,
-    //             status: ''
-    //         }, index, () => {
-    //           if (day.getUTCDate() !== dayEnd.getUTCDate()) {
-    //             index++;
-    //             this.recursiveLoadRecord(recorder, dayStart, dayEnd, dayIncrement, index, callback);
-    //           } else {
-    //               console.log(`loadRecord finished for day ${day.toDateString()}, index=${index}`);
-    //           }
-    //         });
-    //     }
-    //     const day = addDays(dayStart, index * dayIncrement);
-    //     recorder.recordExists(day).then(exists => {
-    //       if (exists) {
-    //         recorder.getLocations(day).then(locations => {
-    //             onLocations(day, locations, index);
-    //         }).catch(e => console.error(e));
-    //       } else {
-    //         onLocations(day, [], index);
-    //         }
-    //     }).catch(e => console.error(e));
-    // }
 
     componentDidMount() {
         const dayStart = today();
@@ -154,6 +99,9 @@ class PublishScreen extends CheckPublishAbstract {
               }).catch(e => {
                 onCompleted(dataArray, '', e);
               });
+          },
+          () => {
+            Alert.alert('Thank you !', 'Your personal location record has been published successfully.');
           }
       );
     }

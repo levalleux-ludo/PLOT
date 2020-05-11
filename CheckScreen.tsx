@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Alert } from 'react-native';
 import { Text, View, Accordion, Icon, List, ListItem, Left, Right, Body } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
-import { LocationArea } from './LocationService';
 import LocationRecorder, { today, dayBefore, addDays } from './LocationRecorder';
 import { BloomFilterService } from './BloomFilterService';
 import { Table, TableWrapper, Row } from 'react-native-table-component';
@@ -49,7 +48,7 @@ class CheckScreen extends CheckPublishAbstract {
                 const nbHashes = infos.bloomFilter.nbHashes;
                 fetchService.getGIR(day).then(gir => {
                     const bloomFilter = BloomFilterService.fromBuckets(gir, nbHashes);
-                    setTimeout(() => resolve(bloomFilter), 1);
+                    setTimeout(() => resolve(bloomFilter), 0);
                 }).catch(e => {
                     console.error(e);
                     reject(e);
@@ -88,9 +87,11 @@ class CheckScreen extends CheckPublishAbstract {
     componentDidMount() {
         const dayStart = today();
         const dayEnd = addDays(dayStart, -15);
+        let cumulNbContact = 0;
         this.loadRecord(
           dayStart,
           15,
+          // callback
           (data: DataItem, index: number, next: () => void) => {
               const onCompleted = (dataArray: DataItem[], status: string, e?: Error) => {
                 if (e) {
@@ -117,7 +118,6 @@ class CheckScreen extends CheckPublishAbstract {
               data.selected = true;
               this.setState({dataArray, loaded, loading});
               const day = data.day;
-            //   this.generateBloomFilter(day).then((bloomFilter) => {
                 data.error = false;
                 data.completed = false;
                 data.computing = false;
@@ -132,6 +132,7 @@ class CheckScreen extends CheckPublishAbstract {
                     this.setState(dataArray);
                     this.compare(day, globalRecord).then((nbContacts) => {
                         data.nbContacts = nbContacts;
+                        cumulNbContact += nbContacts;
                         onCompleted(dataArray, 'nb contacts:');
                     }).catch(e => {
                         onCompleted(dataArray, '', e);
@@ -139,9 +140,10 @@ class CheckScreen extends CheckPublishAbstract {
                 }).catch(e => {
                   onCompleted(dataArray, '', e);
                 });
-            //   }).catch(e => {
-            //     onCompleted(dataArray, '', e);
-            //   });
+          },
+          // next
+          () => {
+            Alert.alert(`Total nb of contacts with infectious people: ${cumulNbContact}`);
           }
       );
     }
