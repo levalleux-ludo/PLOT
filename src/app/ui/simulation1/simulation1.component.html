@@ -5,7 +5,7 @@
             <p>To begin, let&rsquo;s start with a very simplified (downscaled) model, just keeping in mind the real scale to ensure the chosen design will fit it.</p>
             <p>In our simulation, we consider:</p>
             <ul>
-                <li>{{nbTimeSlots}} time slots per day, instead of 240</li>
+                <li>{{simulation.nbTimeSlots}} time slots per day, instead of 240</li>
                 <li>An {{areaSideSize*5}}mx{{areaSideSize*5}}m area, giving a total of {{areaSideSize}}x{{areaSideSize}} unit locations</li>
                 <li>An infection incubation period of 5 days, instead of 15</li>
             </ul>
@@ -15,17 +15,17 @@
                     <label>Nb of time slots per day: </label>
                     <input clrInput #inputNbTimeSlots step="1" max="6" min="4" type="number" value="{{nbTimeSlotsPerDay}}" placeholder="Nb of time slots per day">
                 </clr-input-container>
-                <button class="btn btn-primary" [disabled]="inputNbTimeSlots.value == nbTimeSlotsPerDay" (click)="nbTimeSlotsPerDay = inputNbTimeSlots.value; timeSlots=createTimeSlots(); individuals = createIndividuals(); refreshGlobalinfectionReport();">Apply</button>
+                <button class="btn btn-primary" [disabled]="inputNbTimeSlots.value == nbTimeSlotsPerDay" (click)="nbTimeSlotsPerDay = inputNbTimeSlots.value; refreshSimulation();">Apply</button>
                 <clr-input-container>
                     <label>Nb of days: </label>
                     <input clrInput #inputNbDays step="1" max="4" min="2" type="number" value="{{nbOfDays}}" placeholder="Nb of days">
                 </clr-input-container>
-                <button class="btn btn-primary" [disabled]="inputNbDays.value == nbOfDays" (click)="nbOfDays = inputNbDays.value; timeSlots=createTimeSlots(); individuals = createIndividuals(); refreshGlobalinfectionReport();">Apply</button>
+                <button class="btn btn-primary" [disabled]="inputNbDays.value == nbOfDays" (click)="nbOfDays = inputNbDays.value; refreshSimulation();">Apply</button>
                 <clr-input-container>
                     <label>Nb of unit location per side: </label>
                     <input clrInput #inputareaSideSize step="1" max="8" min="4" type="number" value="{{areaSideSize}}" placeholder="Nb of unit location per side">
                 </clr-input-container>
-                <button class="btn btn-primary" [disabled]="inputareaSideSize.value == areaSideSize" (click)="areaSideSize = inputareaSideSize.value; timeSlots=createTimeSlots(); individuals = createIndividuals(); refreshGlobalinfectionReport();">Apply</button>
+                <button class="btn btn-primary" [disabled]="inputareaSideSize.value == areaSideSize" (click)="areaSideSize = inputareaSideSize.value; refreshSimulation();">Apply</button>
                 <clr-input-container>
                     <label>Infection incubation period: </label>
                     <input clrInput #inputIncubationPeriod step="1" max="8" min="4" type="number" value="{{incubationPeriod}}" placeholder="Infection incubation period">
@@ -34,11 +34,11 @@
             </form>
             <h3>Individuals' location records:</h3>
             <p>These location records are rendomly generated for the simulation purpose</p>
-            <button class="btn btn-primary" (click)="individuals = createIndividuals();  refreshGlobalinfectionReport();">Generate new records</button>
+            <button class="btn btn-primary" (click)="refreshSimulation();">Generate new records</button>
             <div class="clr-row">
-                <div *ngFor="let individual of individuals" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
+                <div *ngFor="let individual of simulation.individuals" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
                     <div>{{individual.name}} location record:</div>
-                    <textarea style="height: calc( 24px * {{nbTimeSlots}} + 4px)">{{locationRecord(individual)}}</textarea>
+                    <textarea style="height: calc( 24px * {{simulation.nbTimeSlots}} + 4px)">{{locationRecord(individual)}}</textarea>
                     <!-- <table>
                                   <tbody>
                                       <tr *ngFor="let itemY of [].constructor(areaSideSize); let y = index">
@@ -52,18 +52,18 @@
             </div>
             <p>Across time:</p>
             <div class="clr-row">
-                <div *ngFor="let timeSlot of timeSlots" class="timeSlot {{getClassesForTable()}}">
+                <div *ngFor="let timeSlot of simulation.timeSlots" class="timeSlot {{getClassesForTable()}}">
                     <div>day: {{timeSlot.day}}</div>
                     <div>slot: {{timeSlot.slotInDay}}</div>
                     <table>
                         <tbody>
-                            <tr *ngFor="let locationRow of timeSlot.locations; let y = index;">
-                                <td *ngFor="let locationCol of locationRow; let x = index;" class=" tab-cell left">{{whoIsHere(timeSlot.time, x, y)}}</td>
+                            <tr *ngFor="let y of simulation.allY">
+                                <td *ngFor="let x of simulation.allX" class=" tab-cell left">{{whoIsHere(timeSlot.time, x, y)}}</td>
                             </tr>
                         </tbody>
                     </table>
                     <p>contacts:</p>
-                    <textarea style="margin: 12px; width: 80%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{detectContact(timeSlot)}}</textarea>
+                    <textarea style="margin: 12px; width: 80%; align-self: center; height: calc( 24px * {{simulation.individuals.length}} + 4px)">{{detectContact(timeSlot)}}</textarea>
                 </div>
             </div>
             <h3>Infection Status:</h3>
@@ -73,15 +73,15 @@
                     <thead>
                         <tr>
                             <td>Time:</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">
                                 d:{{timeSlot.day}},s:{{timeSlot.slotInDay}}
                             </td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let individual of individuals">
+                        <tr *ngFor="let individual of simulation.individuals">
                             <td>{{individual.name}}</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">
                                 <input type="checkbox" clrCheckbox [checked]="individual.infectedTime >= 0 && individual.infectedTime <= timeSlot.time" (change)="onChecked($event, individual, timeSlot)" />
                                 <!-- <input type="checkbox" clrCheckbox [checked]="individual.infectedTime >= 0 && individual.infectedTime <= timeSlot.time" [disabled]="individual.infectedTime >= 0 && individual.infectedTime < timeSlot.time" (change)="onChecked($event.target.checked, individual, timeSlot)"
                             /> -->
@@ -96,18 +96,18 @@
                     <thead>
                         <tr>
                             <td>Time:</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">{{timeSlot.time}}</td>
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">{{timeSlot.time}}</td>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>Infected Zones:</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;" style="min-width: 36px;">
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;" style="min-width: 36px;">
                                 <!-- <textarea style="margin: 2px; width: 100%; align-self: center; height: calc( 24px * {{individuals.length}} + 4px)">{{getGlobalInfectionAtTime(timeSlot.time)}}</textarea> -->
                                 <table>
                                     <tbody>
-                                        <tr *ngFor="let y of allY">
-                                            <td *ngFor="let x of allX" class=" tab-cell" [ngClass]="{'red': isInfected(timeSlot.time, x, y)}">
+                                        <tr *ngFor="let y of simulation.allY">
+                                            <td *ngFor="let x of simulation.allX" class=" tab-cell" [ngClass]="{'red': isInfected(timeSlot.time, x, y)}">
                                                 <!-- <div *ngIf="isInfected(timeSlot.time, x, y)" style="background-color: red;">X</div> -->
                                             </td>
                                         </tr>
@@ -128,8 +128,8 @@
                     <li> each uint32 is a encoded value of the tuple (x, y, ts) meaning that the location (x,y) is infected at the time slot ts in the given day</li>
                 </ul>
             </div>
-            <div class="clr-row">
-                <div *ngFor="let day of allDays" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
+            <!-- <div class="clr-row">
+                <div *ngFor="let day of simulation.allDays" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
                     <table class="table">
                         <thead>
                             <tr>
@@ -143,7 +143,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> -->
             <div>
                 <p>Note: a small optimization can be done when we can avoid duplicate values in each set. Hence N*M is the maximum dimension of a day global infection record.</p>
             </div>
@@ -154,20 +154,20 @@
                     <thead>
                         <tr>
                             <td>Time:</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">
                                 d:{{timeSlot.day}},s:{{timeSlot.slotInDay}}
                             </td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let individual of individuals">
+                        <tr *ngFor="let individual of simulation.individuals">
                             <td>{{individual.name}}</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">
                                 <span *ngIf="individual.infectedTime >= 0">N/A</span>
                                 <span *ngIf="individual.infectedTime < 0">
-                                  <!-- {{computeRisk(individual, timeSlot)}} -->
-                                    {{computeRisk_md(individual, timeSlot)}}<br>
-                                      {{computeScore_md(individual, timeSlot)}}
+                                  {{computeScore(individual, timeSlot)}}
+                                    <!-- {{computeRisk_md(individual, timeSlot)}}<br>
+                                      {{computeScore_md(individual, timeSlot)}} -->
                                   </span>
                             </td>
                         </tr>
@@ -187,9 +187,9 @@
                         <input clrInput #inputNbTimeSlots step="64" max="1024" min="64" type="number" value="{{bloomSize}}" (change)="bloomSize = $event.target.value" placeholder="Bloom size">
                     </clr-input-container>
                 </form>
-                <button class="btn btn-primary" (click)="computeBlooms()">Compute</button>
+                <!-- <button class="btn btn-primary" (click)="computeBlooms()">Compute</button> -->
                 <div class="clr-row">
-                    <div *ngFor="let day of allDays" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
+                    <div *ngFor="let day of simulation.allDays" class="clr-col-10 clr-col-md-5 clr-col-lg-3 clr-col-xl-2">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -211,18 +211,23 @@
                     <thead>
                         <tr>
                             <td>Time:</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">
                                 d:{{timeSlot.day}},s:{{timeSlot.slotInDay}}
                             </td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let individual of individuals">
-                            <td>{{individual.name}}</td>
-                            <td *ngFor="let timeSlot of timeSlots; let i = index;">
+                        <tr *ngFor="let individual of simulation.individuals">
+                            <td>
+                                <!-- {{individual.name}} -->
+                                <button (click)="computeAllScore_bloom(individual)">{{individual.name}}</button>
+                            </td>
+                            <td *ngFor="let timeSlot of simulation.timeSlots; let i = index;">
                                 <span *ngIf="individual.infectedTime >= 0">N/A</span>
                                 <span *ngIf="individual.infectedTime < 0">
-                                    {{computeScore_bloom(individual, timeSlot)}}
+                                    <!-- {{computeScore_bloom(individual, timeSlot)}} -->
+                                    {{getLastScore_bloom(individual, timeSlot)}}
+                                    <!-- <button (click)="computeScore_bloom(individual, timeSlot)">{{getLastScore_bloom(individual, timeSlot)}}</button> -->
                                 </span>
                             </td>
                         </tr>
