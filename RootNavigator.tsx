@@ -5,8 +5,9 @@ import HomeScreen from './HomeScreen';
 import DetailsScreen from './DetailsScreen';
 import MenuScreen from './MenuScreen';
 import MainScreen from './MainScreen';
-import PublishScreen from './PublishScreen';
+import BloomFilterScreen from './BloomFilterScreen';
 import CheckScreen from './CheckScreen';
+import PublishScreen from './PublishScreen';
 
 
 const Stack = createStackNavigator();
@@ -29,6 +30,7 @@ function RootNavigator() {
                 <Stack.Screen name="Publish" component={PublishScreen} />
                 <Stack.Screen name="Check" component={CheckScreen} />
                 <Stack.Screen name="Details" component={DetailsScreen}  options={{ header: () => null }}/>
+                <Stack.Screen name="BloomFilters" component={BloomFilterScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     )
