@@ -1,0 +1,33 @@
+{
+    "expo": {
+        "name": "PLOT-App",
+        "slug": "PLOT-App",
+        "platforms": [
+            "ios",
+            "android",
+            "web"
+        ],
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/PLOT.png",
+        "splash": {
+            "image": "./assets/PLOT.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+        },
+        "updates": {
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "PLOT"
+        },
+        "android": {
+            "package": "PLOT"
+        },
+        "entryPoint": "node_modules/expo/AppEntry.js"
+    }
+}
