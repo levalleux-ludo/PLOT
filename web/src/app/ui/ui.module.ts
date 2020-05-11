@@ -18,6 +18,8 @@ import { PresentationComponent } from './presentation/presentation.component';
 import { ScrollDispatcher, ScrollingModule } from '@angular/cdk/scrolling';
 import { Simulation1Component } from './simulation1/simulation1.component';
 import { Simulation2Component } from './simulation2/simulation2.component';
+import { OutcomesComponent } from './outcomes/outcomes.component';
+import { DemosComponent } from './demos/demos.component';
 
 
 
@@ -36,7 +38,9 @@ import { Simulation2Component } from './simulation2/simulation2.component';
     DocWrapperComponent,
     PresentationComponent,
     Simulation1Component,
-    Simulation2Component
+    Simulation2Component,
+    OutcomesComponent,
+    DemosComponent
   ],
   imports: [
     CommonModule,
