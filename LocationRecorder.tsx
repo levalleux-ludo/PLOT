@@ -5,13 +5,13 @@ import { randomInt } from './Utils';
 export const fake = true;
 
 export function createFakeData() {
-    const nbDays = 15;
-    const minLocationsPerDay = 10;
-    const maxLocationsPerDay = 20;
-    const minLatitude = +51.3;
-    const maxLatitude = +51.34;
-    const minLongitude = -0.01;
-    const maxLongitude = +0.01;
+    const nbDays = 5;
+    const minLocationsPerDay = 20;
+    const maxLocationsPerDay = 40;
+    const minLatitude = +51.148;
+    const maxLatitude = +51.152;
+    const minLongitude = 0.868;
+    const maxLongitude = +0.872;
     const accuracyFactor = 10000;
     let date = today();
     const recorder = new LocationRecorder();

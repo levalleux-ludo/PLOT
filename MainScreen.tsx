@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
 import { Container, Content, Footer, FooterTab, Button, Icon, Left, Body, Header, Right, Title } from 'native-base';
-import { StyleSheet, Dimensions, Alert, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Dimensions, Alert, Text, TouchableOpacity, View, PixelRatio } from 'react-native';
 import { useNavigation, NavigationContainer } from '@react-navigation/native';
 import BackgroundGeolocation, { ServiceStatus, StationaryLocation, Location, LocationError } from '@mauron85/react-native-background-geolocation';
 import MapComponent from './MapComponent';
-import { Region, LatLng } from 'react-native-maps';
+import { Region, LatLng, MapEvent } from 'react-native-maps';
 import LocationService, { LocationArea } from './LocationService';
 import LocationRecorder, { today, dayBefore, dayAfter } from './LocationRecorder';
 import { createStackNavigator } from '@react-navigation/stack';
 import TableComponent from './TableComponent';
+import { MenuProvider, Menu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu';
 
-const defaultLatitudeDelta = 0.015;
-const defaultLongitudeDelta = 0.0121;
+const defaultLatitudeDelta = 0.005;
+const defaultLongitudeDelta = 0.002;
 
 interface MyState {
     region: Region | undefined,
@@ -23,10 +24,17 @@ interface MyState {
     currentDay: Date,
     hasDayBefore: boolean,
     hasDayAfter: boolean,
-    showMap: boolean
+    showMap: boolean,
+    showMenu: boolean,
+    menuPosition: {x: number, y: number},
+    menuLocationIdx: number,
+    menuOption: number
 }
 
 const Stack = createStackNavigator();
+
+// Menu.debug = true;
+const { ContextMenu, SlideInMenu, Popover } = renderers;
 
 class MainScreen extends Component {
 
@@ -40,7 +48,11 @@ state: MyState = {
     currentDay: today(),
     hasDayBefore: true,
     hasDayAfter: true,
-    showMap: true
+    showMap: true,
+    showMenu: false,
+    menuPosition: {x:0, y:0},
+    menuLocationIdx: -1,
+    menuOption: -1
   };
 
     constructor(props: any) {
@@ -52,6 +64,10 @@ state: MyState = {
         this.switchToTableView = this.switchToTableView.bind(this);
         this.getValueAtCol = this.getValueAtCol.bind(this);
         this.getRowStyle = this.getRowStyle.bind(this);
+        this.closeMenu = this.closeMenu.bind(this);
+        this.onPressPolygon = this.onPressPolygon.bind(this);
+        this.onClickMenuOption = this.onClickMenuOption.bind(this);
+        this.isLocationHidden = this.isLocationHidden.bind(this);
     }
 
     componentDidMount() {
@@ -120,6 +136,45 @@ state: MyState = {
       this.refreshRegion();
     }
 
+    onPressPolygon = (idx: number) => ((e: MapEvent) => {
+        console.log("onPressPolygon", e, "idx:", idx);
+        const showMenu = !this.state.showMenu;
+        const menuPosition = {
+          x: e.nativeEvent.position.x / PixelRatio.get(),
+          y: e.nativeEvent.position.y / PixelRatio.get()
+        };
+        const menuLocationIdx = idx;
+        let menuOption = 1;
+        if (this.isLocationHidden(idx))
+        {
+          // If the location is already hidden
+          menuOption = 0;
+        }
+        console.log("showMenu", showMenu, "position", menuPosition);
+        this.setState({showMenu, menuPosition, menuOption, menuLocationIdx});
+      }
+    );
+
+    closeMenu() {
+      console.log("close Menu");
+      this.setState({showMenu: false});
+    }
+
+    onClickMenuOption(option: number) {
+      console.log("click menu option", option);
+      const location = this.state.locations[this.state.menuLocationIdx].toLatLng();
+      if (option === 0) {
+        // Reveal the location
+        console.log('reveal location', location);
+        this.hideLocation(location, false);
+      } else {
+        // Hide the location
+        console.log('hide location', location);
+        this.hideLocation(location, true);
+      }
+      this.closeMenu();
+    }
+
     onChangeDay(currentDay: Date) {
       const recorder = new LocationRecorder();
       const hasDayAfter = recorder.recordExists(dayAfter(currentDay));
@@ -165,6 +220,16 @@ state: MyState = {
       this.setState({hiddenLocations});
     }
 
+    isLocationHidden(idx: number): boolean {
+      const location = this.state.locations[idx];
+      if (!location) {
+        return false;
+      }
+      const hiddenLocations = this.state.hiddenLocations;
+      const locationKey = JSON.stringify(location.toLatLng());
+      return hiddenLocations.has(locationKey);
+    }
+
     getValueAtCol(area: LocationArea, colIndex: number) {
       const location = area.toLatLng();
       const locationKey = JSON.stringify(location);
@@ -199,8 +264,9 @@ state: MyState = {
     }
 
     render() {
-        const { locations, stationaries, region, isRunning, currentDay, hasDayBefore, hasDayAfter }: MyState = this.state;
+        const { locations, stationaries, region, isRunning, currentDay, hasDayBefore, hasDayAfter, showMenu, menuPosition, menuOption }: MyState = this.state;
         return (
+          <MenuProvider backHandler={true}>
             <Container>
                 <Content scrollEnabled={false}  padder={false}>
                 { this.state.showMap ? 
@@ -211,11 +277,19 @@ state: MyState = {
                    onRegionChange={this.onRegionChange}
                    onPressZoomIn={this.onPressZoomIn}
                    onPressZoomOut={this.onPressZoomOut}
+                   onPressPolygon={this.onPressPolygon}
+                   closeMenu={this.closeMenu}
+                   onClickMenuOption={this.onClickMenuOption}
+                   isLocationHidden={this.isLocationHidden}
+                   showMenu={showMenu}
+                   menuPosition={menuPosition}
+                   menuOption={menuOption}
                    >
                   </MapComponent>
                   <TouchableOpacity style={styles.switchToTable} onPress={this.switchToTableView}>
                     <Icon name="md-list" style={styles.iconSwitchToTable}/>
                   </TouchableOpacity>
+                  
                   </View>
                 :
                 <Container>
@@ -255,6 +329,7 @@ state: MyState = {
                 </FooterTab>
                 </Footer>
             </Container>
+            </MenuProvider>
         )
     }
 }
