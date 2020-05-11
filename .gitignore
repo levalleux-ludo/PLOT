@@ -8,3 +8,5 @@ lib
 lib_test
 .idea/
 *.iml
+tmp
+records

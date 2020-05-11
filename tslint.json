@@ -1,6 +1,12 @@
 {
-  "extends": [
-    "tslint:latest",
-    "tslint-config-prettier"
-  ]
+    "extends": [
+        "tslint:latest",
+        "tslint-config-prettier"
+    ],
+    "rules": {
+        "interface-name": false,
+        "ordered-imports": false,
+        "object-literal-sort-keys": false,
+        "no-console": false
+    }
 }

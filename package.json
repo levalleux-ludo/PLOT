@@ -24,14 +24,19 @@
         "prepublishOnly": "npm run build",
         "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
         "build": "tsc --pretty",
-        "test": "jest",
-        "coverage": "jest --coverage",
+        "test": "jest --runInBand",
+        "coverage": "jest --coverage --runInBand",
         "watch": "npm run build -- --watch",
-        "watch:test": "jest --watch"
+        "watch:test": "jest --watch --runInBand",
+        "start": "npm run build && node lib/index.js",
+        "watch:start": "nodemon lib/index.js"
     },
     "dependencies": {
+        "@types/bloomfilter": "0.0.0",
+        "bloomfilter": "0.0.18",
         "body-parser": "^1.19.0",
         "express": "^4.17.1",
+        "fs": "0.0.1-security",
         "lodash": "^4.17.15"
     },
     "devDependencies": {

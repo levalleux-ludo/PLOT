@@ -35,11 +35,22 @@
       "runtimeArgs": [
         "--inspect-brk",
         "${workspaceRoot}/node_modules/jest/bin/jest.js",
-        "--runInBand"
+        "--runInBand",
+        "--runTestsByPath",
+        "__tests__/api.controller-spec.ts"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "port": 9229
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Server",
+      "program": "${workspaceRoot}/lib/index.js",
+      "args": [
+      ],
+      "cwd": "${workspaceRoot}"
     }
   ]
 }

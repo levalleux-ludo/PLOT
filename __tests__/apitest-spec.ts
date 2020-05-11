@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies
 import supertest = require('supertest');
 import apiTest = require('../src/apitest');
 
